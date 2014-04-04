@@ -1,3 +1,5 @@
+#### C++
+
 # Compiled Object files
 *.slo
 *.lo
@@ -19,6 +21,11 @@
 *.exe
 *.out
 *.app
+
+# Dependencies
+.*.d
+
+#### Python
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
