@@ -17,6 +17,9 @@ class picture(object):
     def get(self, l, c):
         return self.arr[l + c * self.nlines]
 
+    def score(self):
+        return len(self.prints) + len(self.erase)
+
     def printsq(self, l, c, s=0):
         self.prints.append((l, c, s))
         for i in xrange(l - s, l + s + 1):
@@ -31,7 +34,7 @@ class picture(object):
         self.erases.append((l, c))
 
     def display(self):
-        print(len(self.prints) + len(self.erase))
+        print(self.score())
         for (l, c, s) in self.prints:
             print('PAINTSQ {} {} {}'.format(l, c, s))
         for (l, c) in self.erase:
