@@ -13,8 +13,9 @@ class square(object):
 
     def cost_add(self):
         c = 1
+        pic = self.pic
         for (i, j) in self.iter():
-            tmp = self.pic.get(i, j)
+            tmp = pic.get(i, j)
             if tmp.val == False and tmp.cur == False:
                 # We will need an erase
                 c = c + 1
@@ -76,7 +77,7 @@ class picture(object):
         self.sqs = set([])
         self.fix_cost = nlines * ncol
         self.fix = []
-        
+
     def get(self, l, c):
         return self.arr[l + c * self.nlines]
 
@@ -96,9 +97,7 @@ class picture(object):
     def display(self):
         self.fixit()
         print(self.score())
-        for (l, c, s) in self.sqs:
-            print('PAINTSQ {} {} {}'.format(l, c, s))
-        for (l, c) in self.erase:
-            print('ERASECELL {} {}'.format(l, c))
+        for sq in self.sqs:
+            print('PAINTSQ {} {} {}'.format(sq.l, sq.c, sq.s))
         for i in self.fix:
             print(i)
