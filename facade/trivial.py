@@ -13,5 +13,5 @@ def trivial(f):
     print(len(res))
     for i in res:
         print(i)
-        
+
 trivial(sys.stdin)
