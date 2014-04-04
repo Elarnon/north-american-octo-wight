@@ -15,12 +15,12 @@ def create_table(pict):
             for l in xrange(k+1, pict.nlines-k+1):
                 t[c][l][k] = 0
                 if k == 0:
-                    if pict.get(l,c):
+                    if pict.get(l,c).val:
                         t[c][l][k] = 1
                     else:
                         t[c][l][k] = 0
                 else :
                     for x in [-k,k]:
-                        for y in range(-k,k):
+                        for y in range(-k,k+1):
                             t[c][l][k] = t[c][l][k] + t[c+x][l+y][0] + t[c+y][l+x][0]
     return t

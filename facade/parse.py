@@ -13,8 +13,9 @@ class square(object):
 
     def cost_add(self):
         c = 1
+        pic = self.pic
         for (i, j) in self.iter():
-            tmp = self.pic.get(i, j)
+            tmp = pic.get(i, j)
             if tmp.val == False and tmp.cur == False:
                 # We will need an erase
                 c = c + 1
