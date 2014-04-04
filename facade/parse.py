@@ -42,18 +42,15 @@ class square(object):
             tmp['sqs'].remove(self)
             if len(tmp['sqs']) == 0:
                 tmp['cur'] = False
-        pic.prints.remove(self)
+        pic.sqs.remove(self)
 
     def add(self):
         pic = self.pic
-        pic.prints.add(self)
+        pic.sqs.add(self)
         for (i, j) in self.iter():
             tmp = pic.get(i, j)
             tmp['cur'] = True
             tmp['sqs'].add(self)
-
-    def erase(self, l, c):
-        self.erased.union(set([(l, c)]))
 
 class picture(object):
     def parse(self, f):
@@ -68,17 +65,17 @@ class picture(object):
         self.nlines = nlines
         self.ncols = ncol
         self.arr = arr
-        self.prints = set([])
+        self.sqs = set([])
         self.fix = []
         
     def get(self, l, c):
         return self.arr[l + c * self.nlines]
 
     def score(self):
-        return len(self.prints) + len(self.fix)
+        return len(self.sqs) + len(self.fix)
 
     def fixit(self):
-        self.prints = [x for x in self.prints if x.active]
+        self.sqs = [x for x in self.sqs if x.active]
         for line in xrange(0, self.nlines):
             for col in xrange(0, self.ncols):
                 tmp = self.get(line, col)
@@ -90,7 +87,7 @@ class picture(object):
     def display(self):
         self.fixit()
         print(self.score())
-        for (l, c, s) in self.prints:
+        for (l, c, s) in self.sqs:
             print('PAINTSQ {} {} {}'.format(l, c, s))
         for (l, c) in self.erase:
             print('ERASECELL {} {}'.format(l, c))
