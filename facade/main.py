@@ -23,8 +23,18 @@ def setp():
     if op == 0:
         adds = []
         rms = []
-    cost = 0
+    cost = o.score()
+    for s in adds:
+        square(o, s[0], s[1], s[2]).add()
+    for s in rms:
+        square(o, s[0], s[1], s[2]).rm()
+    cost = o.score() - cost
     if random.random() < alpha*math.exp(-beta * cost):
-        pass #Executues modifs
+        for s in adds:
+            square(o, s[0], s[1], s[2]).add()
+        for s in rms:
+            square(o, s[0], s[1], s[2]).rm()
+    
+        
 
 
