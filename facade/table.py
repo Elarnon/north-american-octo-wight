@@ -1,5 +1,4 @@
 from parse import *
-from table import *
 
 def create_table(pict):
     p = (min(pict.nlines, pict.ncols) - 1) / 2 

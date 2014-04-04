@@ -1,5 +1,5 @@
-import parse
-import table
+from table import *
+from parse import *
 
 def compute_sqc(table, pict):
     p = (min(pict.nlines, pict.ncols) - 1) / 2 
