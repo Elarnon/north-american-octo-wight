@@ -96,9 +96,7 @@ class picture(object):
     def display(self):
         self.fixit()
         print(self.score())
-        for (l, c, s) in self.sqs:
-            print('PAINTSQ {} {} {}'.format(l, c, s))
-        for (l, c) in self.erase:
-            print('ERASECELL {} {}'.format(l, c))
+        for sq in self.sqs:
+            print('PAINTSQ {} {} {}'.format(sq.l, sq.c, sq.s))
         for i in self.fix:
             print(i)
