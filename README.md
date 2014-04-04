@@ -1,4 +1,4 @@
 north-american-octo-wight
 =========================
 
-Repository of the ens{,imag} team
+Repository of the ens{,imag} team for the Hashcode
