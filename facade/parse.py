@@ -76,7 +76,7 @@ class picture(object):
         self.sqs = set([])
         self.fix_cost = nlines * ncol
         self.fix = []
-        
+
     def get(self, l, c):
         return self.arr[l + c * self.nlines]
 
