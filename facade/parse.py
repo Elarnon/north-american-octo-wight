@@ -15,10 +15,10 @@ class square(object):
         c = 1
         for (i, j) in self.iter():
             tmp = self.pic.get(i, j)
-            if tmp['val'] == False and tmp['cur'] == False:
+            if tmp.val == False and tmp.cur == False:
                 # We will need an erase
                 c = c + 1
-            elif tmp['val'] == True and tmp['cur'] == False:
+            elif tmp.val == True and tmp.cur == False:
                 # We improve !
                 c = c - 1
         return c
@@ -27,10 +27,10 @@ class square(object):
         c = -1
         for (i, j) in self.iter():
             tmp = self.pic.get(i, j)
-            if tmp['val'] == False and tmp['cur'] == True:
+            if tmp.val == False and tmp.cur == True:
                 # Good !
                 c = c - 1
-            elif tmp['val'] == True and tmp['cur'] == True and len(tmp['sqs']) == 1:
+            elif tmp.val == True and tmp.cur == True and len(tmp.sqs) == 1:
                 # Bad !
                 c = c + 1
         return c
@@ -39,9 +39,9 @@ class square(object):
         pic = self.pic
         for (i, j) in self.iter():
             tmp = pic.get(i, j)
-            tmp['sqs'].remove(self)
-            if len(tmp['sqs']) == 0:
-                tmp['cur'] = False
+            tmp.sqs.remove(self)
+            if len(tmp.sqs) == 0:
+                tmp.cur = False
         pic.sqs.remove(self)
 
     def add(self):
@@ -49,8 +49,14 @@ class square(object):
         pic.sqs.add(self)
         for (i, j) in self.iter():
             tmp = pic.get(i, j)
-            tmp['cur'] = True
-            tmp['sqs'].add(self)
+            tmp.cur = True
+            tmp.sqs.add(self)
+
+class point(object):
+    def __init__(self, val):
+        self.val = val
+        self.cur = False
+        self.sqs = set([])
 
 class picture(object):
     def parse(self, f):
@@ -61,7 +67,7 @@ class picture(object):
         for line in xrange(0, nlines):
             l = f.readline()
             for col in xrange(0, ncol):
-                arr.append({ "val": (l[col] == '#'), "cur": False, "sqs": set([]) })
+                arr.append(point((l[col] == '#')))
         self.nlines = nlines
         self.ncols = ncol
         self.arr = arr
@@ -75,13 +81,13 @@ class picture(object):
         return len(self.sqs) + len(self.fix)
 
     def fixit(self):
-        self.sqs = [x for x in self.sqs if x.active]
+        self.fix = []
         for line in xrange(0, self.nlines):
             for col in xrange(0, self.ncols):
                 tmp = self.get(line, col)
-                if tmp['val'] == True and tmp['cur'] == False:
+                if tmp.val == True and tmp.cur == False:
                     self.fix.append('PAINTSQ {} {} 0'.format(line, col))
-                elif tmp['val'] == False and tmp['cur'] == True:
+                elif tmp.val == False and tmp.cur == True:
                     self.fix.append('ERASECELL {} {}'.format(line, col))
 
     def display(self):
