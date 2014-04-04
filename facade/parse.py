@@ -27,16 +27,17 @@ class square(object):
         c = -1
         for (i, j) in self.iter():
             tmp = self.pic.get(i, j)
-            if tmp.val == False and tmp.cur == True:
+            if tmp.val == False:
                 # Good !
                 c = c - 1
-            elif tmp.val == True and tmp.cur == True and len(tmp.sqs) == 1:
+            elif tmp.val == True and len(tmp.sqs) == 1:
                 # Bad !
                 c = c + 1
         return c
 
     def rm(self):
         pic = self.pic
+        pic.fix_cost += self.cost_rm()
         for (i, j) in self.iter():
             tmp = pic.get(i, j)
             tmp.sqs.remove(self)
@@ -46,6 +47,7 @@ class square(object):
 
     def add(self):
         pic = self.pic
+        pic.fix_cost += self.cost_add()
         pic.sqs.add(self)
         for (i, j) in self.iter():
             tmp = pic.get(i, j)
@@ -72,6 +74,7 @@ class picture(object):
         self.ncols = ncol
         self.arr = arr
         self.sqs = set([])
+        self.fix_cost = nlines * ncol
         self.fix = []
         
     def get(self, l, c):
