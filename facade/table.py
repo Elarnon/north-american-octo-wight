@@ -8,11 +8,12 @@ def create_table(pict):
         for c in xrange(0, pict.ncols):
             tmp1 = []
             for l in xrange(0, pict.nlines):
-                tmp0.append(tmp1)
+                tmp1.append(0)
+            tmp0.append(tmp1)
         t.append(tmp0)
     for k in xrange(0, p):
-        for c in xrange(k+1, pict.ncols-k+1):
-            for l in xrange(k+1, pict.nlines-k+1):
+        for c in xrange(k+1, pict.ncols-k):
+            for l in xrange(k+1, pict.nlines-k):
                 t[c][l][k] = 0
                 if k == 0:
                     if pict.get(l,c).val:
