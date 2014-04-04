@@ -16,6 +16,3 @@ def create_table(pict):
                     for x in [-k,k]:
                         for y in range(-k,k):
                             t[c][l][k] = t[c][l][k] + t[c+x][l+y][0] + t[c+y][l+x][0]
-
-
-
