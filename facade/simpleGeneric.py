@@ -16,10 +16,13 @@ def parse(f):
 nlines, ncol, arr = parse(sys.stdin)
 
 # Detect simple squares
+k = 2 
+squareSize = 2*k + 1
+
 res = []
-for line in xrange(1, nlines - 1):
-    for col in xrange(1, ncol - 1):
-        tries = [(i, j) for i in xrange(line-1, line+2) for j in xrange(col-1, col+2)]
+for line in xrange(k, nlines - k):
+    for col in xrange(k, ncol - k):
+        tries = [(i, j) for i in xrange(line-k, line+k+1) for j in xrange(col-k, col+k+1)]
         hasone = False
         err = []
         for (i, j) in tries:
