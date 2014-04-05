@@ -1,6 +1,7 @@
 #include "main.h"
 #include <cstdio>
 
+
 Routage* parse() {
   long ninter, nrues, time, nvehic, start;
   scanf(" %d %d %d %d %d", &ninter, &nrues, &time, &nvehic, &start);
@@ -22,3 +23,5 @@ Routage* parse() {
   }
   return new Routage(inters, ninter, rues, nrues, cars, nvehic, start, time);
 }
+
+

@@ -1,3 +1,7 @@
+#ifndef MAIN_HEADER_GUARD
+#define MAIN_HEADER_GUARD
+
+
 #include<list>
 
 struct Intersection;
@@ -63,3 +67,6 @@ struct Routage {
   long start;
   long time;
 };
+
+
+#endif
