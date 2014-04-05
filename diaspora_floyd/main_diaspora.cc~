@@ -1,0 +1,9 @@
+#include "main.h"
+#include "diaspora.h"
+
+
+int main() {
+  parse();
+  write_diaspora(diaspora()) ;
+  return 0 ;
+}
