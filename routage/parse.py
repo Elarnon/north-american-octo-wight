@@ -28,12 +28,13 @@ class voiture(object):
         self.time = self.time + cost
 
 class intersection(object):
-    def __init__(self, inters, rues, lat, lon):
+    def __init__(self, inters, rues, id, lat, lon):
         self.inters = inters
         self.rues = rues
         self.lat = lat
         self.lon = lon
         self.alls = []
+        self.id = id
 
     def goods(self):
         return [r for r in self.alls if r.ok]
@@ -91,7 +92,7 @@ def trivial(f):
         l = f.readline().split(' ')
         lat = Decimal(l[0])
         lon = Decimal(l[1])
-        inters[inter] = intersection(inters, rues, lat, lon)
+        inters[inter] = intersection(inters, rues, inter, lat, lon)
     for ru in xrange(0, nrues):
         l = f.readline().split(' ')
         a = int(l[0])
