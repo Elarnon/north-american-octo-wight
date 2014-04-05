@@ -32,6 +32,9 @@ class intersection(object):
         self.lon = lon
         self.alls = []
 
+    def goods(self):
+        return [r for r in self.alls if r.ok]
+
 class rue(object):
     def __init__(self, inters, rues, start, end, bidir, cost, score):
         self.inters = inters
@@ -43,8 +46,8 @@ class rue(object):
         self.end = end
         if bidir:
             inters[end].alls.append(self)
-        self.cost = cost
-        self.score = cost
+        self.time = cost
+        self.score = score
 
     def path(self, start):
         if start == self.start:
@@ -53,6 +56,23 @@ class rue(object):
             return self.start
         else:
             return None
+
+    def raw(self):
+        return (float(self.score * 1000000) / float(self.time))
+
+    def real_gain(self, pos, k):
+        if k == 0:
+            return self.raw()
+        nxt = self.path(pos)
+        c = self.raw()
+        for r in self.inters[nxt].goods():
+            c += r.real_gain(nxt, k-1)
+        return c
+
+    # Plus le cout est faible plus on veut aller sur la rue
+    def gain(self, pos):
+        rc = self.real_gain(pos, 10)
+        return rc
 
 def trivial(f):
     l = f.readline().split(' ')
@@ -89,21 +109,34 @@ def trivial(f):
         c = cars.get()
         done = False
         for r in inters[c.pos].alls:
-            if not r.ok and r.cost + c.time < time:
-                c.move(r.path(c.pos), r.cost)
-                r.ok = True
-                done = True
-                break
+            best = None
+            best_cost = None
+            if not r.ok and r.time + c.time < time:
+                cst = r.gain(c.pos)
+                if best is None:
+                    best = r
+                    best_cost = cst
+                elif cst > best_cost:
+                    best = r
+                    best_cost = cst
+        if best is not None:
+            r = best
+            c.move(r.path(c.pos), r.time)
+            r.ok = True
+            done = True
         if not done:
             oks = []
+            best_gain = 0.0
             for r in inters[c.pos].alls:
-                if r.cost + c.time < time:
-                    oks.append(r)
+                if r.time + c.time < time:
+                    cst = r.gain(c.pos)
+                    if cst * 2 > best_gain:
+                        oks.append(r)
+                        if cst > best_gain:
+                            best_gain = cst
             if len(oks) > 0:
                 r = random.choice(oks)
-                c.move(r.path(c.pos), r.cost)
-                c.time = c.time + r.cost
-                r.ok = True
+                c.move(r.path(c.pos), r.time)
                 done = True
         cars.task_done()
         if done:
