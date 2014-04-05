@@ -3,7 +3,7 @@ from Queue import *
 import sys
 import random
 
-PROFONDEUR = 2
+PROFONDEUR = 1
 
 class voiture(object):
     def __init__(self, inters, rues, pos):
@@ -117,4 +117,4 @@ def parse(f):
         cars.put(c)
         all_cars.add(c)
 
-    return (cars, inters, rues, time, nvehic, all_cars)
+    return (cars, inters, rues, time, nvehic, start, all_cars)

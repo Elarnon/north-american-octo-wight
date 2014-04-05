@@ -1,4 +1,5 @@
 from math import *
+from floyd_warshall import *
 
 def diaspora(src, costs, inters):
     r2 = sqrt(2)
@@ -19,6 +20,6 @@ def diaspora(src, costs, inters):
 
 def main_diaspora(src, inters, rues):
     (costs, paths) = to_matrix(inters, rues)
-    (costs, paths) = floy_warshall(costs, paths)
+    (costs, paths) = floyd_warshall(costs, paths)
     final_but = diaspora(src, costs, inters)
     [ paths[src.id][but.id] for but in final_but ]
