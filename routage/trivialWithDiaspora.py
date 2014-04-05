@@ -8,15 +8,15 @@ def trivial(cars, inters, rues, time, nvehic, start, all_cars):
         cars.put(car)
 
     ## TODO : improve parameter
-    diasporaTime = time / 10
+    diasporaTime = time / 2
 
 ## First part : diaspora
     while not cars.empty():
         c = cars.get()
         done = False
         best = None
+        best_cost = None
         for r in inters[c.pos].alls:
-            best_cost = None
             if r.time + c.time < diasporaTime:
                 cst = r.gain(c.pos)
                 if best is None:
@@ -44,7 +44,7 @@ def trivial(cars, inters, rues, time, nvehic, start, all_cars):
         for r in inters[c.pos].alls:
             best_cost = None
             if r.time + c.time < time:
-                cst = r.gain(c.pos)
+                cst = r.gainDiaspora(c)
                 if best is None:
                     best = r
                     best_cost = cst

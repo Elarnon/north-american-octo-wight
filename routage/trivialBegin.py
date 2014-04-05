@@ -1,16 +1,9 @@
 from parse import *
-from diaspora import main_diaspora
 
 GAIN_MULT = 5
 
 def trivial(cars, inters, rues, time, nvehic, start, all_cars):
     cars = PriorityQueue(nvehic)
-    di = main_diaspora(start, inters, rues)
-    i = 0
-    for car in all_cars:
-        for p in di[i]:
-            car.move(p.path(car.pos), p.time)
-        i = i + 1
     for car in all_cars:
         cars.put(car)
     while not cars.empty():

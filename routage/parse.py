@@ -1,17 +1,20 @@
 from decimal import *
 from Queue import *
+from math import *
 import sys
 import random
 
 PROFONDEUR = 1
 
 class voiture(object):
-    def __init__(self, inters, rues, pos):
+    def __init__(self, inters, rues, pos, direction):
         self.inters = inters
         self.rues = rues
         self.pos = pos
         self.time = 0
         self.path = [pos]
+        ## Direction for diaspora
+        self.direction = direction
 
     def __cmp__(self, other):
         if self.time < other.time:
@@ -86,7 +89,18 @@ class rue(object):
         (score, time) = self.real_gain(pos, PROFONDEUR)
         return float(score) / float(time)
 
+    def gainDiaspora(self, car):
+        (x, y) = car.direction
+        endInter = self.inters[self.end]
+        startInter = self.inters[self.start]
+        return x*float(endInter.lat - startInter.lat) + y*float(endInter.lon - endInter.lon)
+
 def parse(f):
+
+    ## Directions for diaspora
+    r2 = sqrt(2)
+    dirs = [(1.,0.), (r2, r2), (0.,1.), (-r2, r2), (-1.,0.), (-r2, -r2), (0., -1.), (r2, -r2)]
+
     l = f.readline().split(' ')
     ninter = int(l[0])
     nrues = int(l[1])
@@ -113,7 +127,7 @@ def parse(f):
     cars = PriorityQueue(nvehic)
     all_cars = set([])
     for i in xrange(0, nvehic):
-        c = voiture(inters, rues, start)
+        c = voiture(inters, rues, start, dirs[i])
         cars.put(c)
         all_cars.add(c)
 
