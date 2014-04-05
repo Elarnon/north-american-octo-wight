@@ -1,6 +1,7 @@
 from decimal import *
 from Queue import *
 import sys
+import random
 
 class voiture(object):
     def __init__(self, inters, rues, pos):
@@ -81,27 +82,31 @@ def trivial(f):
         # TODO: Not updated
         stuff.add(c)
 
-    time = 100
-        
     while not cars.empty():
         c = cars.get()
         done = False
         for r in inters[c.pos].alls:
             if not r.ok and r.cost + c.time < time:
-                c.pos = r.path(c.pos)
+                npos = r.path(c.pos)
+                c.pos = npos
+                c.path.append(npos)
                 c.time = c.time + r.cost
                 r.ok = True
                 done = True
                 break
         if not done:
+            oks = []
             for r in inters[c.pos].alls:
                 if r.cost + c.time < time:
-                    c.pos = r.path(c.pos)
-                    c.path.append(c.pos)
-                    c.time = c.time + r.cost
-                    r.ok = True
-                    done = True
-                    break
+                    oks.append(r)
+            if len(oks) > 0:
+                r = random.choice(oks)
+                npos = r.path(c.pos)
+                c.pos = npos
+                c.path.append(npos)
+                c.time = c.time + r.cost
+                r.ok = True
+                done = True
         cars.task_done()
         if done:
             cars.put(c)
