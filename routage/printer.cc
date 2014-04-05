@@ -8,7 +8,7 @@ void print_basic(int& c, int display) {
   for(int i = 0 ; i < k ; ++i) {
     putchar(' ') ;
   }
-  printf("%d", display) ;
+  printf("%d\n", display) ;
 }
 
 void sin_printer(int nvehic, Car* cars) {
