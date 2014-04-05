@@ -66,4 +66,6 @@ void dijkstra(long from);
 std::list<long> find_path(long to);
 std::list<long> find_one_path(std::vector<long> tos);
 
+std::vector<std::vector<long>> allPointsSets(int numElems);
+
 #endif

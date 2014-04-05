@@ -30,7 +30,8 @@ int main() {
     auto points = allPointsSets(10); // TODO
     int diaspora_time = total_time / 10;
     for(int i =0; i<nvehic; i++) {
-        path = find_one_path(points[i]);
+        auto l = find_one_path(points[i]);
+        std::vector<long> path{ std::begin(l), std::end(l) };
         for(int j=1; j<path.size(); j++) {
             if(dist[path[j]] > diaspora_time) {
                 break;
