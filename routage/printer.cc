@@ -3,7 +3,7 @@
 #define PI 3.14159265
 
 void print_basic(int& c, int display) {
-  int k = floor(sin( static_cast<float>(c) * PI/80.)) ;
+  int k = floor(80. * sin( static_cast<float>(c) * PI/80.)) ;
   ++c;
   for(int i = 0 ; i < k ; ++i) {
     putchar(' ') ;
