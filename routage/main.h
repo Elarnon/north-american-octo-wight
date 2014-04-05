@@ -60,4 +60,8 @@ extern long total_time;
 
 void parse();
 
+void djikstra_init();
+void dijkstra(long from);
+std::list<long> find_path(long to);
+
 #endif
