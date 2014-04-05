@@ -27,8 +27,8 @@ int main() {
         pq.push(i);
     }
     // Diaspora
-    auto points = allPointsSets(10); // TODO
-    int diaspora_time = total_time / 10;
+    auto points = allPointsSets(DIASPORA_SIZE); // TODO
+    int diaspora_time = total_time / DIASPORA_DIV;
     for(int i =0; i<nvehic; i++) {
         auto l = find_one_path(points[i]);
         std::vector<long> path{ std::begin(l), std::end(l) };
