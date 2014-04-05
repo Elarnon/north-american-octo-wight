@@ -67,10 +67,15 @@ class rue(object):
         if k == 0:
             return self.raw()
         nxt = self.path(pos)
-        c = self.raw()
+        c = 0.0
+        nb = 0
         for r in self.inters[nxt].goods():
+            nb = nb + 1
             c += r.real_gain(nxt, k-1)
-        return c
+        if nb == 0:
+            return self.raw()
+        else:
+            return self.raw() + (c / float(nb))
 
     # Plus le cout est faible plus on veut aller sur la rue
     def gain(self, pos):
