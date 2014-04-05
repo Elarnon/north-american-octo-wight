@@ -97,3 +97,15 @@ list<long> find_path(long to) {
   }
   return res;
 }
+
+list<long> find_one_path(std::vector<long> tos) {
+  long min(-1);
+  long mini;
+  for (auto to : tos) {
+    if (min == -1 || (dist[to] != -1 && dist[to] < min)) {
+      min = dist[to];
+      mini = to;
+    }
+  }
+  return find_path(mini);
+}

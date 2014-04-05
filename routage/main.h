@@ -57,11 +57,13 @@ extern Car *cars;
 extern long nvehic;
 extern long start;
 extern long total_time;
+extern long *dist;
 
 void parse();
 
 void djikstra_init();
 void dijkstra(long from);
 std::list<long> find_path(long to);
+std::list<long> find_one_path(std::vector<long> tos)
 
 #endif
