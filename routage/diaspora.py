@@ -1,4 +1,5 @@
 from math import *
+from floyd_warshall import *
 
 def diaspora(londre, center, costs, inters):
     r2 = sqrt(2)
