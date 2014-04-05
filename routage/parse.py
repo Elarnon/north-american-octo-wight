@@ -12,12 +12,17 @@ class voiture(object):
         self.path = [pos]
 
     def __cmp__(self, other):
-        if self.pos < other.pos:
+        if self.time < other.time:
             return -1
-        elif self.pos == other.pos:
+        elif self.time == other.time:
             return 0
         else:
             return 1
+
+    def move(self, npos, cost):
+        self.pos = npos
+        self.path.append(npos)
+        self.time = self.time + cost
 
 class intersection(object):
     def __init__(self, inters, rues, lat, lon):
@@ -40,7 +45,6 @@ class rue(object):
             inters[end].alls.append(self)
         self.cost = cost
         self.score = cost
-        self.cars = set([])
 
     def path(self, start):
         if start == self.start:
@@ -79,7 +83,6 @@ def trivial(f):
     for i in xrange(0, nvehic):
         c = voiture(inters, rues, start)
         cars.put(c)
-        # TODO: Not updated
         stuff.add(c)
 
     while not cars.empty():
@@ -87,10 +90,7 @@ def trivial(f):
         done = False
         for r in inters[c.pos].alls:
             if not r.ok and r.cost + c.time < time:
-                npos = r.path(c.pos)
-                c.pos = npos
-                c.path.append(npos)
-                c.time = c.time + r.cost
+                c.move(r.path(c.pos), r.cost)
                 r.ok = True
                 done = True
                 break
@@ -101,9 +101,7 @@ def trivial(f):
                     oks.append(r)
             if len(oks) > 0:
                 r = random.choice(oks)
-                npos = r.path(c.pos)
-                c.pos = npos
-                c.path.append(npos)
+                c.move(r.path(c.pos), r.cost)
                 c.time = c.time + r.cost
                 r.ok = True
                 done = True
