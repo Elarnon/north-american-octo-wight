@@ -1,8 +1,7 @@
 #include "main.h"
-
 #include <list>
 
-int comp (const std::pair<Intersection, double>& elem1, const std::pair<Intersection, double>& elem2) 
+int comp (const std::pair<long, double>& elem1, const std::pair<long, double>& elem2) 
 {
     int f = elem1.second;
     int s = elem2.second;
@@ -16,28 +15,28 @@ double distance(double lat1, double lon1,
     return pow(lat1 - lat2, 2) + pow(lon1 - lon2, 2);
 }
 
-std::vector<Intersection> bestPoints(double lat, double lon, int numElems) {
+std::vector<long> bestPoints(double lat, double lon, int numElems) {
 
-    std::vector<std::pair<Intersection, double>> elems;
+    std::vector<std::pair<long, double>> elems;
     Intersection inter;
     double dist;
     for (int i = 0; i < ninters; i++) {
-        inter = inters[0];
+        inter = inters[i];
         dist = distance(lat, lon, inter.lat, inter.lon);
         elems.push_back(
-                std::pair<Intersection, double>(
-                    inter, 
+                std::pair<long, double>(
+                    i, 
                     dist));
     }
     std::sort(elems.begin(), elems.end(), comp);
-    std::vector<Intersection> res;
+    std::vector<long> res;
     for (int i = 0; i < numElems; i++) {
-        res.push_back(elems[0].first);
+        res.push_back(elems[i].first);
     }
     return res;
 }
 
-std::vector<std::vector<Intersection>> allPointsSets(int numElems) {
+std::vector<std::vector<long>> allPointsSets(int numElems) {
    
     std::vector<std::pair<double, double>> finalPoints;
     finalPoints.push_back(std::pair<double, double>(48.898033, 2.346924));
@@ -49,7 +48,7 @@ std::vector<std::vector<Intersection>> allPointsSets(int numElems) {
     finalPoints.push_back(std::pair<double, double>(48.798626, 2.445458));
     finalPoints.push_back(std::pair<double, double>(48.828469, 2.297829));
 
-    std::vector<std::vector<Intersection>> res;
+    std::vector<std::vector<long>> res;
     
     for (auto point : finalPoints) {
         res.push_back(bestPoints(point.first, point.second, numElems));
