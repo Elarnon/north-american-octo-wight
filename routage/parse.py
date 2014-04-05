@@ -3,6 +3,8 @@ from Queue import *
 import sys
 import random
 
+PROFONDEUR = 10
+
 class voiture(object):
     def __init__(self, inters, rues, pos):
         self.inters = inters
@@ -25,12 +27,16 @@ class voiture(object):
         self.time = self.time + cost
 
 class intersection(object):
-    def __init__(self, inters, rues, lat, lon):
+    def __init__(self, inters, rues, id, lat, lon):
         self.inters = inters
         self.rues = rues
         self.lat = lat
         self.lon = lon
         self.alls = []
+        self.id = id
+
+    def goods(self):
+        return [r for r in self.alls if r.ok]
 
 class rue(object):
     def __init__(self, inters, rues, start, end, bidir, cost, score):
@@ -43,8 +49,8 @@ class rue(object):
         self.end = end
         if bidir:
             inters[end].alls.append(self)
-        self.cost = cost
-        self.score = cost
+        self.time = cost
+        self.score = score
 
     def path(self, start):
         if start == self.start:
@@ -54,7 +60,24 @@ class rue(object):
         else:
             return None
 
-def trivial(f):
+    def raw(self):
+        return (float(self.score * 1000000) / float(self.time))
+
+    def real_gain(self, pos, k):
+        if k == 0:
+            return self.raw()
+        nxt = self.path(pos)
+        c = self.raw()
+        for r in self.inters[nxt].goods():
+            c += r.real_gain(nxt, k-1)
+        return c
+
+    # Plus le cout est faible plus on veut aller sur la rue
+    def gain(self, pos):
+        rc = self.real_gain(pos, PROFONDEUR)
+        return rc
+
+def parse(f):
     l = f.readline().split(' ')
     ninter = int(l[0])
     nrues = int(l[1])
@@ -68,7 +91,7 @@ def trivial(f):
         l = f.readline().split(' ')
         lat = Decimal(l[0])
         lon = Decimal(l[1])
-        inters[inter] = intersection(inters, rues, lat, lon)
+        inters[inter] = intersection(inters, rues, inter, lat, lon)
     for ru in xrange(0, nrues):
         l = f.readline().split(' ')
         a = int(l[0])
@@ -79,40 +102,10 @@ def trivial(f):
         r = rue(inters, rue, a, b, d, cost, score)
         rues[ru] = r
     cars = PriorityQueue(nvehic)
-    stuff = set([])
+    all_cars = set([])
     for i in xrange(0, nvehic):
         c = voiture(inters, rues, start)
         cars.put(c)
-        stuff.add(c)
+        all_cars.add(c)
 
-    while not cars.empty():
-        c = cars.get()
-        done = False
-        for r in inters[c.pos].alls:
-            if not r.ok and r.cost + c.time < time:
-                c.move(r.path(c.pos), r.cost)
-                r.ok = True
-                done = True
-                break
-        if not done:
-            oks = []
-            for r in inters[c.pos].alls:
-                if r.cost + c.time < time:
-                    oks.append(r)
-            if len(oks) > 0:
-                r = random.choice(oks)
-                c.move(r.path(c.pos), r.cost)
-                c.time = c.time + r.cost
-                r.ok = True
-                done = True
-        cars.task_done()
-        if done:
-            cars.put(c)
-
-    print(nvehic)
-    for c in stuff:
-        print(len(c.path))
-        for i in c.path:
-            print(i)
-
-trivial(sys.stdin)
+    return (cars, inters, rues, time, nvehic, all_cars)
