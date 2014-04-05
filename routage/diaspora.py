@@ -20,12 +20,6 @@ def diaspora(londre, center, costs, inters):
 
 def main_diaspora(londre, center, inters, rues):
     (costs, paths) = to_matrix(inters, rues)
-<<<<<<< HEAD
-    (costs, paths) = floyd_warshall(costs, paths)
-    final_but = diaspora(src, costs, inters)
-    [ paths[src.id][but.id] for but in final_but ]
-=======
     (costs, paths) = floy_warshall(costs, paths)
     final_but = diaspora(londre, center, costs, inters)
     [ paths[londre.id][but.id] for but in final_but ]
->>>>>>> 96a8cbd24c3ed3d2bf8f700f46775d50c444b632
