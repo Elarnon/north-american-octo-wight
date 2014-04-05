@@ -57,8 +57,3 @@ std::vector<std::vector<long>> allPointsSets(int numElems) {
     return res;
     
 }
-
-
-
-
-
