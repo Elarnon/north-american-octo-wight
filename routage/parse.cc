@@ -2,7 +2,7 @@
 #include <cstdio>
 
 void parse() {
-  scanf(" %ld %ld %ld %ld %ld", &ninters, &nrues, &time, &nvehic, &start);
+  scanf(" %ld %ld %ld %ld %ld", &ninters, &nrues, &total_time, &nvehic, &start);
   inters = new Intersection[ninters];
   rues = new Rue[nrues];
   cars = new Car[nvehic];

@@ -1,9 +1,12 @@
 #ifndef MAIN_HEADER_GUARD
 #define MAIN_HEADER_GUARD
 
+#define PROFONDEUR 5
+
 #include<vector>
 #include<list>
 #include <cstdio>
+#include <algorithm>
 
 struct Intersection;
 struct Rue;
@@ -40,8 +43,8 @@ struct Rue {
 
   long path(long start);
 
-  std::pair<long, long> raw();
-  std::vector<std::pair<long, long>> real_gain(long pos, long k);
+  std::pair<long, long> raw(std::vector<Rue*> &visited);
+  std::vector<std::pair<long, long>> real_gain(long pos, long k, std::vector<Rue*> &visited);
   double gain(long pos);
 };
 
@@ -52,7 +55,7 @@ extern long nrues;
 extern Car *cars;
 extern long nvehic;
 extern long start;
-extern long time;
+extern long total_time;
 
 void parse();
 

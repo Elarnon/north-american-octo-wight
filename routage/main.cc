@@ -9,15 +9,17 @@
  Car *cars;
  long nvehic;
  long start;
- long time;
+ long total_time;
 
-/* class CmpCar {
-  bool comp(
-} */
+struct CmpCar {
+  bool operator()(int i, int j) {
+    return cars[i].time < cars[j].time;
+  }
+};
 
 int main() {
   parse();
-  auto pq = std::priority_queue<long>();
+  auto pq = std::priority_queue<long, std::vector<long>, CmpCar>();
   for (int i(0); i < nvehic; ++i) {
     pq.push(i);
   }
@@ -28,7 +30,7 @@ int main() {
     Rue* best(NULL);
     double best_cost = 0;
     for (Rue *r : inters[c.pos].alls) {
-      if (r->time + c.time < time) {
+      if (r->time + c.time < total_time) {
         auto cst = r->gain(c.pos);
         if (cst > -1.0) {
           if (best == NULL || cst > best_cost) {
