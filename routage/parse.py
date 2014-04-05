@@ -3,6 +3,9 @@ from Queue import *
 import sys
 import random
 
+GAIN_MULT = 2
+PROFONDEUR = 10
+
 class voiture(object):
     def __init__(self, inters, rues, pos):
         self.inters = inters
@@ -71,7 +74,7 @@ class rue(object):
 
     # Plus le cout est faible plus on veut aller sur la rue
     def gain(self, pos):
-        rc = self.real_gain(pos, 10)
+        rc = self.real_gain(pos, PROFONDEUR)
         return rc
 
 def trivial(f):
@@ -130,7 +133,7 @@ def trivial(f):
             for r in inters[c.pos].alls:
                 if r.time + c.time < time:
                     cst = r.gain(c.pos)
-                    if cst * 2 > best_gain:
+                    if cst * GAIN_MULT > best_gain:
                         oks.append(r)
                         if cst > best_gain:
                             best_gain = cst
