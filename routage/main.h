@@ -1,9 +1,9 @@
 #ifndef MAIN_HEADER_GUARD
 #define MAIN_HEADER_GUARD
 
-#define PROFONDEUR 5
-#define DIASPORA_SIZE 10
-#define DIASPORA_DIV 3
+#define PROFONDEUR 10
+#define DIASPORA_SIZE 100
+#define DIASPORA_DIV 5
 
 #include<vector>
 #include<list>
