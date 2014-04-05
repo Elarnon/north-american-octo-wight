@@ -3,7 +3,7 @@ from Queue import *
 import sys
 import random
 
-PROFONDEUR = 60
+PROFONDEUR = 1
 
 class voiture(object):
     def __init__(self, inters, rues, pos):
@@ -73,7 +73,7 @@ class rue(object):
         nxt = self.path(pos)
         best_score = 0
         best_time = 1
-        for r in self.inters[nxt].goods():
+        for r in self.inters[nxt].alls:
             (nscore, ntime) = r.real_gain(nxt, k-1)
             if float(nscore) / float(ntime) > float(best_score) / float(best_time):
                 best_score = nscore
@@ -117,4 +117,4 @@ def parse(f):
         cars.put(c)
         all_cars.add(c)
 
-    return (cars, inters, rues, time, nvehic, all_cars)
+    return (cars, inters, rues, time, nvehic, start, all_cars)

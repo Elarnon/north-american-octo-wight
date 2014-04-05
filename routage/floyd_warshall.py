@@ -11,7 +11,7 @@ def to_matrix(inters, rues):
             if n == m:
                 tmp_costs.append(0)
             else:
-                tmp_costs.append(+inf)
+                tmp_costs.append(+float("inf"))
         costs.append(tmp_costs)
         paths.append(tmp_paths)
 
@@ -32,7 +32,7 @@ def floyd_warshall(costs, paths):
             for j in xrange(0,n):
                 c = costs[i][k] + costs[k][j]
                 if costs[i][j] > c:
-                    costs[i][j] = k
+                    costs[i][j] = c
                     paths[i][j] = paths[i][k] + paths[k][j]
     return (costs, paths)
 
