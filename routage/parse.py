@@ -4,7 +4,7 @@ from math import *
 import sys
 import random
 
-PROFONDEUR = 10
+PROFONDEUR = 5
 
 class voiture(object):
     def __init__(self, inters, rues, pos, direction):
