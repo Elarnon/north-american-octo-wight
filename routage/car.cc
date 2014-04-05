@@ -1,10 +1,6 @@
 #include "main.h"
 
-void Car::set(Intersection** inters, long ninters, Rue** rues, long nrues, long pos) {
-  this->inters = inters;
-  this->ninters = ninters;
-  this->rues = rues;
-  this->nrues = nrues;
+void Car::set(long pos) {
   this->pos = pos;
   this->time = 0;
 }
