@@ -8,25 +8,17 @@ struct Intersection;
 struct Rue;
 
 struct Car {
-  void set(Intersection** inters, long ninters, Rue** rues, long nrues, long pos);
+  void set(long pos);
   void move(long npos, long cost);
 
-  Intersection** inters;
-  long ninters;
-  Rue** rues;
-  long nrues;
   long pos;
   long time;
   std::list<long> path;
 };
 
 struct Intersection {
-  void set(Intersection** inters, long ninters, Rue** rues, long nrues, long id, double lat, double lon);
+  void set(long id, double lat, double lon);
 
-  Intersection** inters;
-  long ninters;
-  Rue** rues;
-  long nrues;
   long id;
   double lat;
   double lon;
@@ -34,12 +26,8 @@ struct Intersection {
 };
 
 struct Rue {
-  void set(Intersection** inters, long ninters, Rue** rues, long nrues, long id, long start, long end, bool bidir, long cost, long score);
+  void set(long id, long start, long end, bool bidir, long cost, long score);
 
-  Intersection** inters;
-  long ninters;
-  Rue** rues;
-  long nrues;
   long id;
   long start;
   long end;
@@ -55,19 +43,15 @@ struct Rue {
   std::pair<long, long> gain(long pos);
 };
 
-struct Routage {
-  Routage(Intersection** inters, long ninters, Rue** rues, long nrues, Car** cars, long ncars, long start, long time);
+extern Intersection **inters;
+extern long ninters;
+extern Rue **rues;
+extern long nrues;
+extern Car **cars;
+extern long nvehic;
+extern long start;
+extern long time;
 
-  Intersection** inters;
-  long ninters;
-  Rue** rues;
-  long nrues;
-  Car ** cars;
-  long ncars;
-  long start;
-  long time;
-};
-
-Routage* parse();
+void parse();
 
 #endif
