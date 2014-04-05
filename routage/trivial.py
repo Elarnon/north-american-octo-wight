@@ -1,7 +1,6 @@
 from parse import *
 
-GAIN_MULT = 2
-PROFONDEUR = 1
+GAIN_MULT = 100
 
 def trivial(cars, inters, rues, time, nvehic, all_cars):
     while not cars.empty():
