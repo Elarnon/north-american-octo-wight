@@ -1,4 +1,5 @@
 #include "diaspora.h"
+#include "main.h"
 #include <cmath>
 
 struct diaspora_data {
@@ -6,28 +7,28 @@ public:
   diaspora_data() : path(), cost(0.f) {}
   diaspora_data(double x) : path(), cost(x) {}
 
-  std::list<Rue*> path ;
+  std::list<Rue& > path ;
   double cost ;
 };
 
-diaspora_data** to_matrix(Routage* routage) {
-  diaspora_data** matrix = new (diaspora_data*)[routage->ninters] ;
-  for(size_t i = 0 ; i < routage->ninters ; ++i) {
-    matrix[i] = new diaspora_data[routage->ninters] ;
-    for(size_t j = 0 ; j < routage->ninters ; ++j) {
+diaspora_data** to_matrix() {
+  diaspora_data** matrix = new (diaspora_data*)[ninters] ;
+  for(size_t i = 0 ; i < ninters ; ++i) {
+    matrix[i] = new diaspora_data[ninters] ;
+    for(size_t j = 0 ; j < ninters ; ++j) {
       matrix[i][j] = diaspora_data(i == j ? 0. : std::numeric_limits<double>::infinity());
     }
   }
   
-  for(long i = 0 ; i < routage->nrues ; ++i) {
-    Rue* r = routage->rues[i] ;
+  for(long i = 0 ; i < nrues ; ++i) {
+    Rue& r = rues[i] ;
 
-    matrix[r->start][r->end].cost = r.time ;
-    matrix[r->start][r->end].path.push_back(r) ;
+    matrix[r.start][r.end].cost = r.time ;
+    matrix[r.start][r.end].path.push_back(r) ;
     
     if(r.bidir) {
-          matrix[r->end][r->start].cost = r.time ;
-	  matrix[r->end][r->start].path.push_back(r) ;
+          matrix[r.end][r.start].cost = r.time ;
+	  matrix[r.end][r.start].path.push_back(r) ;
     }
   }
 
@@ -52,14 +53,14 @@ void floyd_warshall(diaspora_data** matrix, long n) {
   }
 }
 
-std::list<Rue*>* diaspora_aux(Intersection* londre, Routage* routage) {
+std::list<Rue*>* diaspora_aux(Intersection& londre) {
   double r2 = sqrt(2.) ;
   double x[] = { 1., r2, 0., -r2, -1., -r2,  0.,  r2} ;
   double y[] = { 0., r2, 1.,  r2,  0., -r2, -1., -r2} ;
   double kappa = 3. ;
   double centerLat = 0. ;
   double centerLon = 0. ;
-  Intersection** res = { 
+  Intersection&* res = { 
     londre, londre, 
     londre, londre,
     londre, londre,
@@ -67,12 +68,12 @@ std::list<Rue*>* diaspora_aux(Intersection* londre, Routage* routage) {
   }
   float* gain = { 0., 0., 0., 0., 0., 0., 0., 0. } ;
   
-  for(long but_index = 0 ; i < routage->ninters ; ++but_index) {
-    Intersection* but = routage->inters[but_index] ;
+  for(long but_index = 0 ; but_index < ninters ; ++but_index) {
+    Intersection& but = inters[but_index] ;
     for(long i = 0 ; i < 8 ; ++i) {
-      double gain0 = x[i] * (but->lat - centerLat) + y[i] * (but->lon - centerLon) ;
+      double gain0 = x[i] * (but.lat - centerLat) + y[i] * (but.lon - centerLon) ;
       double gain = 
-	copysign(pow(gain0, kappa), gain0) / matrix[londre->id][but->id].cost ;
+	copysign(pow(gain0, kappa), gain0) / matrix[londre.id][but.id].cost ;
       if (gain[i] < gain) {
 	gain[i] = gain ;
 	res[i] = but ;
@@ -80,17 +81,17 @@ std::list<Rue*>* diaspora_aux(Intersection* londre, Routage* routage) {
     }
   }
 
-  std::list<Rue*>* paths[8] ;
+  std::list<Rue& >* paths[8] ;
   for(long i = 0 ; i < 8 ; ++i) {
-    paths[i] = matrix[londre->id][res[i]->id] ;
+    paths[i] = matrix[londre.id][res[i].id] ;
   }
 
   return paths ;
 }
 
 
-std::list<Rue*>*  diaspora(Intersection* londre, Routage* routage) {
-  diaspora_data** matrix = to_matrix(routage) ;
-  floyd_warshall(matrix) ;
-  return diaspora_aux(londre, routage) ;
+std::list<Rue&>*  diaspora(Intersection& londre) {
+  diaspora_data** matrix = to_matrix() ;
+  floyd_warshall(matrix, ninters) ;
+  return diaspora_aux(londre) ;
 }
