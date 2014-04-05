@@ -3,7 +3,7 @@ from Queue import *
 import sys
 import random
 
-PROFONDEUR = 10
+PROFONDEUR = 100
 
 class voiture(object):
     def __init__(self, inters, rues, pos):
@@ -62,25 +62,29 @@ class rue(object):
 
     def raw(self):
         if self.ok:
-            return float(0)
+            real_score = 0
         else:
-            return (float(self.score * 1000000) / float(self.time))
+            real_score = self.score
+        return (real_score, self.time)
 
     def real_gain(self, pos, k):
         if k == 0:
             return self.raw()
         nxt = self.path(pos)
-        c = 0.0
+        best_score = 0
+        best_time = 1
         for r in self.inters[nxt].goods():
-            ncost = r.real_gain(nxt, k-1)
-            if ncost > c:
-                c = ncost
-        return self.raw() + c
+            (nscore, ntime) = r.real_gain(nxt, k-1)
+            if float(nscore) / float(ntime) > float(best_score) / float(best_time):
+                best_score = nscore
+                best_time = ntime
+        myscore, mytime = self.raw()
+        return (best_score + myscore, best_time + mytime)
 
     # Plus le cout est faible plus on veut aller sur la rue
     def gain(self, pos):
-        rc = self.real_gain(pos, PROFONDEUR)
-        return rc
+        (score, time) = self.real_gain(pos, PROFONDEUR)
+        return float(score) / float(time)
 
 def parse(f):
     l = f.readline().split(' ')
