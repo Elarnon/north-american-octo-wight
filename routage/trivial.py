@@ -28,7 +28,6 @@ def trivial(cars, inters, rues, time, nvehic, start, all_cars):
                     elif cst > best_cost:
                         best = r
                         best_cost = cst
-        print best_cost
         if best is not None:
             r = best
             c.move(r.path(c.pos), r.time)

@@ -3,7 +3,7 @@ from Queue import *
 import sys
 import random
 
-PROFONDEUR = 1
+PROFONDEUR = 3
 
 class voiture(object):
     def __init__(self, inters, rues, pos):
