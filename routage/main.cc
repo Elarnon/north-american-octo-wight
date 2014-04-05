@@ -19,6 +19,8 @@ struct CmpCar {
 
 int main() {
     parse();
+    djikstra_init();
+    dijkstra(start);
     auto pq = std::priority_queue<long, std::vector<long>, CmpCar>();
     for (int i(0); i < nvehic; ++i) {
         pq.push(i);
