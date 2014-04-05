@@ -60,31 +60,36 @@ class rue(object):
         else:
             return None
 
-    def raw(self):
-        if self.ok:
+    def raw(self, visited):
+        if self.ok or (self in visited):
             real_score = 0
         else:
             real_score = self.score
         return (real_score, self.time)
 
-    def real_gain(self, pos, k):
+    def real_gain(self, pos, k, visited):
         if k == 0:
-            return self.raw()
+            return [self.raw(visited)]
         nxt = self.path(pos)
-        best_score = 0
-        best_time = 1
+        out = []
+        myscore, mytime = self.raw(visited)
         for r in self.inters[nxt].alls:
-            (nscore, ntime) = r.real_gain(nxt, k-1)
-            if float(nscore) / float(ntime) > float(best_score) / float(best_time):
-                best_score = nscore
-                best_time = ntime
-        myscore, mytime = self.raw()
-        return (best_score + myscore, best_time + mytime)
+            paths = r.real_gain(nxt, k-1, visited + [self])
+            for s, t in paths:
+                out.append((s + myscore, t + mytime))
+        return out
 
     # Plus le cout est faible plus on veut aller sur la rue
     def gain(self, pos):
-        (score, time) = self.real_gain(pos, PROFONDEUR)
-        return float(score) / float(time)
+        paths = self.real_gain(pos, PROFONDEUR, [])
+        best = None
+        for s, t in paths:
+            v = float(s) / float(t)
+            if best == None:
+                best = v
+            elif v > best:
+                best = v
+        return best
 
 def parse(f):
     l = f.readline().split(' ')
