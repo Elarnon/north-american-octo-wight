@@ -17,7 +17,7 @@ double distance(double lat1, double lon1,
 }
 
 
-std::vector<std::pair<Intersection, double>> bestPoints(double lat, double lon, int numElements) {
+std::vector<Intersection> bestPoints(double lat, double lon, int numElems) {
 
     std::vector<std::pair<Intersection, double>> elems;
     Intersection inter;
@@ -31,7 +31,11 @@ std::vector<std::pair<Intersection, double>> bestPoints(double lat, double lon, 
                     dist));
     }
     std::sort(elems.begin(), elems.end(), comp);
-    return elems;
+    std::vector<Intersection> res;
+    for (int i = 0; i < numElems; i++) {
+        res.push_back(elems[0].first);
+    }
+    return res;
 }
 
 
