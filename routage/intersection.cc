@@ -1,6 +1,6 @@
 #include "main.h"
 
-Intersection::Intersection(Intersection** inters, long ninters, Rue** rues, long nrues, long id, double lat, double lon) {
+void Intersection::set(Intersection** inters, long ninters, Rue** rues, long nrues, long id, double lat, double lon) {
   this->inters = inters;
   this->ninters = ninters;
   this->rues = rues;

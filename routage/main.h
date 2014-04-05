@@ -8,7 +8,7 @@ struct Intersection;
 struct Rue;
 
 struct Car {
-  Car(Intersection** inters, long ninters, Rue** rues, long nrues, long pos);
+  void set(Intersection** inters, long ninters, Rue** rues, long nrues, long pos);
   void move(long npos, long cost);
 
   Intersection** inters;
@@ -21,7 +21,7 @@ struct Car {
 };
 
 struct Intersection {
-  Intersection(Intersection** inters, long ninters, Rue** rues, long nrues, long id, double lat, double lon);
+  void set(Intersection** inters, long ninters, Rue** rues, long nrues, long id, double lat, double lon);
 
   Intersection** inters;
   long ninters;
@@ -34,7 +34,7 @@ struct Intersection {
 };
 
 struct Rue {
-  Rue(Intersection** inters, long ninters, Rue** rues, long nrues, long id, long start, long end, bool bidir, long cost, long score);
+  void set(Intersection** inters, long ninters, Rue** rues, long nrues, long id, long start, long end, bool bidir, long cost, long score);
 
   Intersection** inters;
   long ninters;
@@ -68,5 +68,6 @@ struct Routage {
   long time;
 };
 
+Routage* parse();
 
 #endif

@@ -1,6 +1,6 @@
 #include "main.h"
 
-Rue::Rue(Intersection** inters, long ninters, Rue** rues, long nrues, long id, long start, long end, bool bidir, long cost, long score) {
+void Rue::set(Intersection** inters, long ninters, Rue** rues, long nrues, long id, long start, long end, bool bidir, long cost, long score) {
   this->inters = inters;
   this->ninters = ninters;
   this->rues = rues;
