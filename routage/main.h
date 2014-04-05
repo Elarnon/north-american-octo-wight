@@ -64,6 +64,6 @@ void parse();
 void djikstra_init();
 void dijkstra(long from);
 std::list<long> find_path(long to);
-std::list<long> find_one_path(std::vector<long> tos)
+std::list<long> find_one_path(std::vector<long> tos);
 
 #endif
