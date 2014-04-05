@@ -3,7 +3,7 @@ from Queue import *
 import sys
 import random
 
-PROFONDEUR = 3
+PROFONDEUR = 10
 
 class voiture(object):
     def __init__(self, inters, rues, pos):
@@ -71,8 +71,8 @@ class rue(object):
         if k == 0:
             return [self.raw(visited)]
         nxt = self.path(pos)
-        out = []
         myscore, mytime = self.raw(visited)
+        out = [(myscore, mytime)]
         for r in self.inters[nxt].alls:
             paths = r.real_gain(nxt, k-1, visited + [self])
             for s, t in paths:
