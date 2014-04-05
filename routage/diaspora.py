@@ -1,0 +1,2 @@
+def diaspora():
+    return None
