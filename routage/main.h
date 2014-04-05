@@ -1,8 +1,9 @@
 #ifndef MAIN_HEADER_GUARD
 #define MAIN_HEADER_GUARD
 
-
+#include<vector>
 #include<list>
+#include <cstdio>
 
 struct Intersection;
 struct Rue;
@@ -10,6 +11,7 @@ struct Rue;
 struct Car {
   void set(long pos);
   void move(long npos, long cost);
+  bool operator<(const Car& other);
 
   long pos;
   long time;
@@ -39,15 +41,15 @@ struct Rue {
   long path(long start);
 
   std::pair<long, long> raw();
-  std::pair<long, long> real_gain(long pos, long k);
-  std::pair<long, long> gain(long pos);
+  std::vector<std::pair<long, long>> real_gain(long pos, long k);
+  double gain(long pos);
 };
 
-extern Intersection **inters;
+extern Intersection *inters;
 extern long ninters;
-extern Rue **rues;
+extern Rue *rues;
 extern long nrues;
-extern Car **cars;
+extern Car *cars;
 extern long nvehic;
 extern long start;
 extern long time;

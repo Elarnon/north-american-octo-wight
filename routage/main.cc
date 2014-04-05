@@ -1,15 +1,57 @@
 #include "main.h"
+#include <queue>
+#include <cstdio>
 
- Intersection **inters;
+ Intersection *inters;
  long ninters;
- Rue **rues;
+ Rue *rues;
  long nrues;
- Car **cars;
+ Car *cars;
  long nvehic;
  long start;
  long time;
 
+/* class CmpCar {
+  bool comp(
+} */
 
 int main() {
   parse();
+  auto pq = std::priority_queue<long>();
+  for (int i(0); i < nvehic; ++i) {
+    pq.push(i);
+  }
+  while (!pq.empty()) {
+    auto i = pq.top();
+    pq.pop();
+    Car &c = cars[i];
+    Rue* best(NULL);
+    double best_cost = 0;
+    for (Rue *r : inters[c.pos].alls) {
+      if (r->time + c.time < time) {
+        auto cst = r->gain(c.pos);
+        if (cst > -1.0) {
+          if (best == NULL || cst > best_cost) {
+            best_cost = cst;
+            best = r;
+          }
+          }
+      }
+    }
+    if (best != NULL) {
+      c.move(best->path(c.pos), best->time);
+      best->ok = true;
+      pq.push(i);
+      } 
+  }
+
+  
+  printf("%d\n", nvehic);
+  for (int i(0); i < nvehic; ++i) {
+    Car &c = cars[i];
+    printf("%d\n", c.path.size());
+    for (auto i : c.path) {
+      printf("%d\n", i);
+    }
+  }
 }

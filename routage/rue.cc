@@ -1,13 +1,17 @@
 #include "main.h"
 
-void Rue::set(long id, long start, long end, bool bidir, long cost, long score) {
+void Rue::set(long id, long a, long b, bool bidir, long cost, long score) {
   this->id = id;
-  this->start = start;
-  this->end = end;
+  this->start = a;
+  this->end = b;
   this->bidir = bidir;
   this->time = cost;
   this->score = score;
   this->ok = false;
+  inters[start].alls.push_back(this);
+  if (bidir) {
+    inters[end].alls.push_back(this);
+  }
 }
 
 
@@ -29,12 +33,12 @@ std::pair<long, long> Rue::raw() {
   }
 }
 
-std::pair<long, long> Rue::real_gain(long pos, long k) {
+std::vector<std::pair<long, long>> Rue::real_gain(long pos, long k) {
   // TODO
-  return this->raw();
+  return { this->raw() };
 }
 
-std::pair<long, long> Rue::gain(long pos) {
+double Rue::gain(long pos) {
   // TODO
-  return this->raw();
+  return 0.0d;
 }
