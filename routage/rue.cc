@@ -25,34 +25,34 @@ long Rue::path(long start) {
   }
 }
 
-std::pair<long, long> Rue::raw(std::vector<Rue*> &visited) {
-  if (this->ok || std::find(visited.begin(), visited.end(), this) != visited.end()) {
+std::pair<long, long> Rue::raw(std::unordered_set<Rue*> &visited) {
+  if (this->ok || visited.find(this) != visited.end()) {
     return std::make_pair(0, this->time);
   } else {
     return std::make_pair(this->score, this->time);
   }
 }
 
-std::vector<std::pair<long, long>> Rue::real_gain(long pos, long k, std::vector<Rue*> &visited) {
-  if (k == 0 || std::find(visited.begin(), visited.end(), this) != visited.end()) {
+std::vector<std::pair<long, long>> Rue::real_gain(long pos, long k, std::unordered_set<Rue*> &visited) {
+  if (k == 0 || visited.find(this) != visited.end()) {
     return { this->raw(visited) };
   }
   auto nxt = this->path(pos);
   auto p = this->raw(visited);
   std::vector<std::pair<long, long>> out = { p };
-  visited.push_back(this);
+  visited.insert(this);
   for (auto r : inters[nxt].alls) {
     auto paths = r->real_gain(nxt, k-1, visited);
-    for (auto p : paths) {
-      out.push_back(std::make_pair(p.first + p.first, p.second + p.second));
+    for (auto p2 : paths) {
+      out.push_back(std::make_pair(p.first + p2.first, p.second + p2.second));
     }
   }
-  visited.pop_back();
+  visited.erase(this);
   return out;
 }
 
 double Rue::gain(long pos) {
-  auto stuff = std::vector<Rue*>();
+  auto stuff = std::unordered_set<Rue*>();
   auto paths = this->real_gain(pos, PROFONDEUR, stuff);
   double best = -1.0d;
   for (auto p : paths) {
