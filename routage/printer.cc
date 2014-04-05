@@ -1,4 +1,5 @@
 #include <cmath>
+#include "main.h"
 #define PI 3.14159265
 
 void print_basic(int& c, int display) {

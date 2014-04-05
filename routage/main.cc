@@ -1,4 +1,5 @@
 #include "main.h"
+#include "printer.h"
 #include <queue>
 #include <cstdio>
 
@@ -49,13 +50,5 @@ int main() {
       } 
   }
 
-  
-  printf("%d\n", nvehic);
-  for (int i(0); i < nvehic; ++i) {
-    Car &c = cars[i];
-    printf("%d\n", c.path.size());
-    for (auto i : c.path) {
-      printf("%d\n", i);
-    }
-  }
+  sin_printer(nvehic, cars) ;
 }
