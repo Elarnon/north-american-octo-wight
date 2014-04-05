@@ -5,7 +5,7 @@
 
 #include<vector>
 #include<list>
-#include<set>
+#include<unordered_set>
 #include <cstdio>
 #include <algorithm>
 
@@ -44,8 +44,8 @@ struct Rue {
 
   long path(long start);
 
-  std::pair<long, long> raw(std::set<Rue*> &visited);
-  std::vector<std::pair<long, long>> real_gain(long pos, long k, std::set<Rue*> &visited);
+  std::pair<long, long> raw(std::unordered_set<Rue*> &visited);
+  std::vector<std::pair<long, long>> real_gain(long pos, long k, std::unordered_set<Rue*> &visited);
   double gain(long pos);
 };
 

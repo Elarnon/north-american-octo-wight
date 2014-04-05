@@ -25,7 +25,7 @@ long Rue::path(long start) {
   }
 }
 
-std::pair<long, long> Rue::raw(std::set<Rue*> &visited) {
+std::pair<long, long> Rue::raw(std::unordered_set<Rue*> &visited) {
   if (this->ok || visited.find(this) != visited.end()) {
     return std::make_pair(0, this->time);
   } else {
@@ -33,7 +33,7 @@ std::pair<long, long> Rue::raw(std::set<Rue*> &visited) {
   }
 }
 
-std::vector<std::pair<long, long>> Rue::real_gain(long pos, long k, std::set<Rue*> &visited) {
+std::vector<std::pair<long, long>> Rue::real_gain(long pos, long k, std::unordered_set<Rue*> &visited) {
   if (k == 0 || visited.find(this) != visited.end()) {
     return { this->raw(visited) };
   }
@@ -52,7 +52,7 @@ std::vector<std::pair<long, long>> Rue::real_gain(long pos, long k, std::set<Rue
 }
 
 double Rue::gain(long pos) {
-  auto stuff = std::set<Rue*>();
+  auto stuff = std::unordered_set<Rue*>();
   auto paths = this->real_gain(pos, PROFONDEUR, stuff);
   double best = -1.0d;
   for (auto p : paths) {
