@@ -1,11 +1,8 @@
 #include "main.h"
 
-Intersection::Intersection(Intersection** inters, long ninters, Rue** rues, long nrues, long id, double lat, double lon) {
-  this->inters = inters;
-  this->ninters = ninters;
-  this->rues = rues;
-  this->nrues = nrues;
+void Intersection::set(long id, double lat, double lon) {
   this->id = id;
   this->lat = lat;
   this->lon = lon;
+  this->alls = std::list<Rue*>();
 }

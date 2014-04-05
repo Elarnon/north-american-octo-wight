@@ -1,17 +1,20 @@
 from decimal import *
 from Queue import *
+from math import *
 import sys
 import random
 
-PROFONDEUR = 1
+PROFONDEUR = 5
 
 class voiture(object):
-    def __init__(self, inters, rues, pos):
+    def __init__(self, inters, rues, pos, direction):
         self.inters = inters
         self.rues = rues
         self.pos = pos
         self.time = 0
         self.path = [pos]
+        ## Direction for diaspora
+        self.direction = direction
 
     def __cmp__(self, other):
         if self.time < other.time:
@@ -60,33 +63,49 @@ class rue(object):
         else:
             return None
 
-    def raw(self):
-        if self.ok:
+    def raw(self, visited):
+        if self.ok or (self in visited):
             real_score = 0
         else:
             real_score = self.score
         return (real_score, self.time)
 
-    def real_gain(self, pos, k):
+    def real_gain(self, pos, k, visited):
         if k == 0:
-            return self.raw()
+            return [self.raw(visited)]
         nxt = self.path(pos)
-        best_score = 0
-        best_time = 1
+        myscore, mytime = self.raw(visited)
+        out = [(myscore, mytime)]
         for r in self.inters[nxt].alls:
-            (nscore, ntime) = r.real_gain(nxt, k-1)
-            if float(nscore) / float(ntime) > float(best_score) / float(best_time):
-                best_score = nscore
-                best_time = ntime
-        myscore, mytime = self.raw()
-        return (best_score + myscore, best_time + mytime)
+            paths = r.real_gain(nxt, k-1, visited + [self])
+            for s, t in paths:
+                out.append((s + myscore, t + mytime))
+        return out
 
     # Plus le cout est faible plus on veut aller sur la rue
     def gain(self, pos):
-        (score, time) = self.real_gain(pos, PROFONDEUR)
-        return float(score) / float(time)
+        paths = self.real_gain(pos, PROFONDEUR, [])
+        best = None
+        for s, t in paths:
+            v = float(s) / float(t)
+            if best == None:
+                best = v
+            elif v > best:
+                best = v
+        return best
+
+    def gainDiaspora(self, car):
+        (x, y) = car.direction
+        endInter = self.inters[self.end]
+        startInter = self.inters[self.start]
+        return x*float(endInter.lat - startInter.lat) + y*float(endInter.lon - endInter.lon)
 
 def parse(f):
+
+    ## Directions for diaspora
+    r2 = sqrt(2)
+    dirs = [(1.,0.), (r2, r2), (0.,1.), (-r2, r2), (-1.,0.), (-r2, -r2), (0., -1.), (r2, -r2)]
+
     l = f.readline().split(' ')
     ninter = int(l[0])
     nrues = int(l[1])
@@ -113,7 +132,7 @@ def parse(f):
     cars = PriorityQueue(nvehic)
     all_cars = set([])
     for i in xrange(0, nvehic):
-        c = voiture(inters, rues, start)
+        c = voiture(inters, rues, start, dirs[i])
         cars.put(c)
         all_cars.add(c)
 

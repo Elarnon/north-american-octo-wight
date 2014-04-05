@@ -1,27 +1,25 @@
 #include "main.h"
 #include <cstdio>
 
-
-Routage* parse() {
-  long ninter, nrues, time, nvehic, start;
-  scanf(" %d %d %d %d %d", &ninter, &nrues, &time, &nvehic, &start);
-  Intersection** inters = new Intersection*[ninter];
-  Rue** rues = new Rue*[nrues];
-  for (int inter(0); inter < ninter; ++inter) {
+void parse() {
+  scanf(" %ld %ld %ld %ld %ld", &ninters, &nrues, &total_time, &nvehic, &start);
+  inters = new Intersection[ninters];
+  rues = new Rue[nrues];
+  cars = new Car[nvehic];
+  for (int inter(0); inter < ninters; ++inter) {
     double lat, lon;
     scanf(" %lf %lf", &lat, &lon);
-    inters[inter] = new Intersection(inters, ninter, rues, nrues, inter, lat, lon);
+    inters[inter] = Intersection();
+    inters[inter].set(inter, lat, lon);
   }
   for (int ru(0); ru < nrues; ++ru) {
-    long start, end, bidir, cost, score;
-    scanf(" %d %d %d %d %d", &start, &end, &bidir, &cost, &score);
-    rues[ru] = new Rue(inters, ninter, rues, nrues, ru, start, end, bidir == 2, cost, score);
+    long a, b, bidir, cost, score;
+    scanf(" %ld %ld %ld %ld %ld", &a, &b, &bidir, &cost, &score);
+    rues[ru] = Rue();
+    rues[ru].set(ru, a, b, bidir == 2, cost, score);
   }
-  Car** cars = new Car*[nvehic];
   for (int i(0); i < nvehic; ++i) {
-    cars[i] = new Car(inters, ninter, rues, nrues, start);
+    cars[i] = Car();
+    cars[i].set(start);
   }
-  return new Routage(inters, ninter, rues, nrues, cars, nvehic, start, time);
 }
-
-
