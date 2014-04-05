@@ -1,5 +1,5 @@
 import parse.py
 
-def optimize(nstep, voitures, rues, intersections):
+def optimize(nstep, cars, rues, intersections, taken):
     for i in xrange(nstep):
-        pass
+        step(cars, rues, intersections, taken)
