@@ -2,7 +2,7 @@ from math import *
 
 def diaspora(src, costs, inters):
     r2 = sqrt(2)
-    kappa = 2   # power parameter for gain
+    kappa = 1   # power parameter for gain (odd number)
     dirs = [(1,0), (r2, r2), (0,1), (-r2, r2), (-1,0), (-r2, -r2), (0, -1), (r2, -r2)]
     max_buts = [(src,0) for x in xrange(0,8)]
     for but in inters:
