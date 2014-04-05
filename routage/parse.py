@@ -98,12 +98,14 @@ class rue(object):
         (x, y) = car.direction
         endInter = self.inters[self.end]
         startInter = self.inters[self.start]
-        return x*float(endInter.lat - startInter.lat) + y*float(endInter.lon - endInter.lon)
+        deltaX = float(endInter.lat - startInter.lat)
+        deltaY = float(endInter.lon - startInter.lon)
+        return (x*deltaX + y*deltaY) / sqrt(deltaX**2 + deltaY**2)
 
 def parse(f):
 
     ## Directions for diaspora
-    r2 = sqrt(2)
+    r2 = 1./sqrt(2)
     dirs = [(1.,0.), (r2, r2), (0.,1.), (-r2, r2), (-1.,0.), (-r2, -r2), (0., -1.), (r2, -r2)]
 
     l = f.readline().split(' ')
