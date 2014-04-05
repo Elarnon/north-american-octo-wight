@@ -6,10 +6,10 @@ def trivial(cars, inters, rues, time, nvehic, all_cars):
     while not cars.empty():
         c = cars.get()
         done = False
-        for r in inters[c.pos].alls:
-            best = None
+        best = None
+        for r in inters[c.pos].goods():
             best_cost = None
-            if not r.ok and r.time + c.time < time:
+            if r.time + c.time < time:
                 cst = r.gain(c.pos)
                 if best is None:
                     best = r
@@ -28,7 +28,7 @@ def trivial(cars, inters, rues, time, nvehic, all_cars):
             for r in inters[c.pos].alls:
                 if r.time + c.time < time:
                     cst = r.gain(c.pos)
-                    if cst * GAIN_MULT > best_gain:
+                    if best_gain < 0.01 or cst * GAIN_MULT > best_gain:
                         oks.append(r)
                         if cst > best_gain:
                             best_gain = cst
