@@ -1,8 +1,13 @@
 #ifndef MAIN_HEADER_GUARD
 #define MAIN_HEADER_GUARD
 
+#define PROFONDEUR 5
 
+#include<vector>
 #include<list>
+#include<unordered_set>
+#include <cstdio>
+#include <algorithm>
 
 struct Intersection;
 struct Rue;
@@ -10,6 +15,7 @@ struct Rue;
 struct Car {
   void set(long pos);
   void move(long npos, long cost);
+  bool operator<(const Car& other);
 
   long pos;
   long time;
@@ -38,19 +44,19 @@ struct Rue {
 
   long path(long start);
 
-  std::pair<long, long> raw();
-  std::pair<long, long> real_gain(long pos, long k);
-  std::pair<long, long> gain(long pos);
+  std::pair<long, long> raw(std::unordered_set<Rue*> &visited);
+  std::vector<std::pair<long, long>> real_gain(long pos, long k, std::unordered_set<Rue*> &visited);
+  double gain(long pos);
 };
 
-extern Intersection **inters;
+extern Intersection *inters;
 extern long ninters;
-extern Rue **rues;
+extern Rue *rues;
 extern long nrues;
-extern Car **cars;
+extern Car *cars;
 extern long nvehic;
 extern long start;
-extern long time;
+extern long total_time;
 
 void parse();
 
