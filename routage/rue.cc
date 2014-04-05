@@ -1,10 +1,6 @@
 #include "main.h"
 
-Rue::Rue(Intersection** inters, long ninters, Rue** rues, long nrues, long id, long start, long end, bool bidir, long cost, long score) {
-  this->inters = inters;
-  this->ninters = ninters;
-  this->rues = rues;
-  this->nrues = nrues;
+void Rue::set(long id, long start, long end, bool bidir, long cost, long score) {
   this->id = id;
   this->start = start;
   this->end = end;
@@ -18,7 +14,7 @@ Rue::Rue(Intersection** inters, long ninters, Rue** rues, long nrues, long id, l
 long Rue::path(long start) {
   if (start == this->start) {
     return this->end;
-  } else if (start = this-> end && bidir) {
+  } else if (start == this->end && bidir) {
     return this->start;
   } else {
     return -1;

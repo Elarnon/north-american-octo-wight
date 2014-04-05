@@ -5,12 +5,12 @@ GAIN_MULT = 5
 
 def trivial(cars, inters, rues, time, nvehic, start, all_cars):
     cars = PriorityQueue(nvehic)
-    di = main_diaspora(start, inters, rues)
-    i = 0
-    for car in all_cars:
-        for p in di[i]:
-            car.move(p.path(car.pos), p.time)
-        i = i + 1
+    #di = main_diaspora(start, inters, rues)
+    #i = 0
+    #for car in all_cars:
+    #    for p in di[i]:
+    #        car.move(p.path(car.pos), p.time)
+    #    i = i + 1
     for car in all_cars:
         cars.put(car)
     while not cars.empty():
@@ -21,12 +21,13 @@ def trivial(cars, inters, rues, time, nvehic, start, all_cars):
         for r in inters[c.pos].alls:
             if r.time + c.time < time:
                 cst = r.gain(c.pos)
-                if best is None:
-                    best = r
-                    best_cost = cst
-                elif cst > best_cost:
-                    best = r
-                    best_cost = cst
+                if cst != None:
+                    if best is None:
+                        best = r
+                        best_cost = cst
+                    elif cst > best_cost:
+                        best = r
+                        best_cost = cst
         if best is not None:
             r = best
             c.move(r.path(c.pos), r.time)
