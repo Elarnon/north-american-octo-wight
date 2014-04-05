@@ -6,6 +6,7 @@
 
 
 std::list<Rue* >*  diaspora() ;
-
+void print_diaspora(std::list<Rue*>* paths) ;
+std::list<long>* read_diaspora() ;
 
 #endif
