@@ -1,9 +1,11 @@
 #ifndef DIASPORA_HEADER_GUARD
 #define DIASPORA_HEADER_GUARD
 
-#include <vector>
+#include "main.h"
+#include <list>
 
-std::list<Rue*>*  diaspora(Intersection* londre, Routage* routage) ;
+
+std::list<Rue* >*  diaspora(Intersection& londre) ;
 
 
 #endif
