@@ -12,6 +12,7 @@ int main(int argc, char* argv[]) {
     ("input,i", po::value<string>(), "input file")
     ("map,m", po::value<string>(), "map file")
     ("output,o", po::value<string>(), "output file")
+    ("correct,c", "improve")
     ("prune,p", "perform pruning")
     ("elarnon,e", "perform elarnon's optimization")
     ("deadends,d", "take missed deadends if possible")
@@ -20,6 +21,9 @@ int main(int argc, char* argv[]) {
     ("search,s", "exhaustive search")
     ("depth", po::value<unsigned long>()->default_value(10), "search depth")
     ("no-stats", "don't display stats")
+    ("balance,a", "banlance cars")
+    ("final,l", "final optimization")
+    ("kill,k", "kill a car")
     ("force,f", "try all optimizations recursively (unsupported)")
     ;
   po::positional_options_description p;
@@ -52,6 +56,12 @@ int main(int argc, char* argv[]) {
   if (vm.count("prune")) {
     routage.prune();
   }
+  if (vm.count("final")) {
+    routage.multi_elarnon();
+  }
+  if (vm.count("correct")) {
+    routage.correct();
+  }
   if (vm.count("elarnon")) {
     routage.elarnon(vm["depth"].as<unsigned long>());
   }
@@ -61,8 +71,17 @@ int main(int argc, char* argv[]) {
   if (vm.count("backtrack")) {
     routage.stat_last_prune();
   }
+  if (vm.count("balance")) {
+    routage.balance();
+  }
+  if (vm.count("kill")) {
+    routage.kill();
+  }
   if (vm.count("search")) {
     routage.search(vm["depth"].as<unsigned long>());
+  }
+  if (vm.count("untangle")) {
+    routage.untangle();
   }
   if (!vm.count("no-stats")) {
     routage.do_stuff();
@@ -81,8 +100,18 @@ int main(int argc, char* argv[]) {
       name += "d";
     if (vm.count("backtrack"))
       name += "b";
+    if (vm.count("untangle"))
+      name += "u";
+    if (vm.count("kill"))
+      name += "k";
     if (vm.count("search"))
       name += "s";
+    if (vm.count("correct"))
+      name += "c";
+    if (vm.count("final"))
+      name += "f";
+    if (vm.count("balance"))
+      name += "a";
     if (name != vm["input"].as<string>()) {
       FILE* f(fopen(name.c_str(), "w"));
       routage.print(f);

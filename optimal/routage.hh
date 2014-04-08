@@ -30,21 +30,29 @@ public:
   void print(FILE* stream);
   void do_stuff();
   void prune();
-  list<Road*>::iterator prunable(list<Road*>::iterator it, list<Road*>::iterator end);
-  pair<Intersection*, list<Road*> > extend_path(Intersection* pos, Road* r);
+  void kill();
+  void collect(Car* c);
   void correct();
   void take_deadends();
   pair<list<Road*>, double> shortest_path(Intersection* from, Intersection* to);
+  void shortest_paths_from(Intersection* from);
+  pair<list<Road*>, long> shortest_path_to(Intersection* to);
   void search(long depth);
   void untangle();
+  void balance();
+  void multi_elarnon();
   void stat_last_prune();
   void make_graph();
+  void multi_elarnon1(Car* slow, Car* fast);
+  void elarnon1();
   void elarnon(long depth);
   // TODO void search();
 
 private:
   // Graph prepare_edges();
   Graph g;
+  vector<Graph::vertex_descriptor> preds;
+  vector<long> dists;
   Intersection* start;
   Intersection** inters;
   long ninters;
