@@ -1,7 +1,7 @@
 CXX=g++
-CXXFLAGS=-g --std=c++11
+CXXFLAGS=-g --std=c++11 -O2
 LDFLAGS=-g
-LDLIBS=
+LDLIBS=-lboost_program_options
 OUT=main
 
 SRC := $(wildcard *.cc)

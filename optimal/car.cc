@@ -5,7 +5,7 @@ Car::Car() {
 }
 
 Car::Car(long p_id, Intersection *p_pos)
-  : id(p_id), pos(p_pos), want(0) {
+  : id(p_id), pos(p_pos), want(0), time(0) {
 }
 
 void Car::move(Road* road) {

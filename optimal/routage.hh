@@ -33,11 +33,13 @@ public:
   list<Road*>::iterator prunable(list<Road*>::iterator it, list<Road*>::iterator end);
   pair<Intersection*, list<Road*> > extend_path(Intersection* pos, Road* r);
   void correct();
-  void search();
   void take_deadends();
-  void make_graph();
-  void elarnon();
   pair<list<Road*>, double> shortest_path(Intersection* from, Intersection* to);
+  void search(long depth);
+  void untangle();
+  void stat_last_prune();
+  void make_graph();
+  void elarnon(long depth);
   // TODO void search();
 
 private:
