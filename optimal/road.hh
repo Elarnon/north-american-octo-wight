@@ -16,7 +16,7 @@ public:
 
   Intersection* use(Intersection* from);
 
-  double gain(Intersection* pos);
+  double gain(Intersection* pos, long depth);
 
   long id;
   Intersection* start;

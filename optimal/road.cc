@@ -1,8 +1,6 @@
 #include "road.hh"
 #include "intersection.hh"
 
-#define PROFONDEUR 12
-
 Road::Road() {
 }
 
@@ -52,9 +50,9 @@ list<pair<long, long>> Road::real_gain(Intersection* pos, long k, unordered_set<
   return out;
 }
 
-double Road::gain(Intersection* pos) {
+double Road::gain(Intersection* pos, long k) {
   auto stuff = unordered_set<Road*>();
-  auto paths = this->real_gain(pos, PROFONDEUR, stuff);
+  auto paths = this->real_gain(pos, k, stuff);
   double best = -1.0d;
   for (auto p : paths) {
     auto v = static_cast<double>(p.first) / static_cast<double>(p.second);

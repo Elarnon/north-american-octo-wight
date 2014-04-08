@@ -29,10 +29,12 @@ public:
   void print(FILE* stream);
   void do_stuff();
   void prune();
-  void search();
+  void search(long depth);
+  void untangle();
+  void stat_last_prune();
   void take_deadends();
   void make_graph();
-  void elarnon();
+  void elarnon(long depth);
   list<Road*> shortest_path(Intersection* from, Intersection* to);
   // TODO void search();
 
