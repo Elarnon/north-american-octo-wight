@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
   routage.make_graph();
   printf("Before: \n");
   routage.do_stuff();
-  routage.search();
+  routage.correct();
   printf("After: \n");
   routage.do_stuff();
   if (argc > 2) {

@@ -5,6 +5,7 @@
 #include "road.hh"
 #include "car.hh"
 #include <utility>
+#include <set>
 #include <algorithm>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -29,11 +30,14 @@ public:
   void print(FILE* stream);
   void do_stuff();
   void prune();
+  list<Road*>::iterator prunable(list<Road*>::iterator it, list<Road*>::iterator end);
+  pair<Intersection*, list<Road*> > extend_path(Intersection* pos, Road* r);
+  void correct();
   void search();
   void take_deadends();
   void make_graph();
   void elarnon();
-  list<Road*> shortest_path(Intersection* from, Intersection* to);
+  pair<list<Road*>, double> shortest_path(Intersection* from, Intersection* to);
   // TODO void search();
 
 private:

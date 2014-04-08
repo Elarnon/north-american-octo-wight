@@ -159,15 +159,17 @@ void Routage::print(FILE* stream) {
   }
 }
 
-list<Road*> Routage::shortest_path(Intersection* from, Intersection* to) {
+pair<list<Road*>, double> Routage::shortest_path(Intersection* from, Intersection* to) {
   vector<Graph::vertex_descriptor> p(num_vertices(g));
+  vector<double> d(num_vertices(g));
   try {
     astar_search(g, from->id,
 		 distance_heuristic<Graph, double, location*>(locs, to->id),
     		 predecessor_map(&p[0]).
+		 distance_map(&d[0]).
 		 visitor(astar_goal_visitor<Graph::vertex_descriptor>(to->id)));
   } catch (found_goal fg) {
-    list<Road*> sp;
+    list<Road*> sp = {};
     Intersection* cur(NULL);
     for (auto v = to->id;; v = p[v]) {
       if (cur == NULL) {
@@ -201,9 +203,9 @@ list<Road*> Routage::shortest_path(Intersection* from, Intersection* to) {
       printf(" = %ld -> %ld", r->start->id, r->end->id);
     }
     printf(" = %ld\n", to->id); */
-    return sp;
+    return make_pair(sp, d[to->id]);
   }
-  return {};
+  exit(17);
 }
 
 void Routage::search() {
@@ -234,6 +236,104 @@ void Routage::search() {
   }
 }
 
+list<Road*>::iterator Routage::prunable(list<Road*>::iterator it, list<Road*>::iterator end) {
+  boost::unordered_set<long> visited;
+  while (it != end && (*it)->done > 1 && visited.find((*it)->id) == visited.end()) {
+    visited.insert((*it)->id);
+    ++it;
+  }
+  return it;
+}
+
+pair<Intersection*, list<Road*> > Routage::extend_path(Intersection* pos, Road* r) {
+  boost::unordered_set<Road*> visited;
+  list<Road*> res;
+  while (r->done == 0 && visited.find(r) == visited.end()) {
+    res.push_back(r);
+    visited.insert(r);
+    pos = r->use(pos);
+    for (Road *other : pos->starts_here) {
+      if (other->done == 0 && visited.find(other) == visited.end()) {
+	r = other;
+	break;
+      }
+    }
+  }
+  return make_pair(pos, res);
+}
+
+void Routage::correct() {
+  int nb_iters(0);
+  for (int i(0); i < ncars; ++i) {
+    Car* c = cars[i];
+    Intersection* pos(start);
+    for (auto it(c->path.begin()), ie(c->path.end()); it != ie; ) {
+      pos = (*it)->use(pos);
+      auto nxt = boost::next(it);
+      for (Road *other : pos->starts_here) {
+	if (other->done == 0) {
+	  nb_iters++;
+	  auto tmp = extend_path(pos, other);
+	  auto final = tmp.first;
+	  auto path = tmp.second;
+	  auto end = prunable(boost::next(nxt), ie);
+	  auto best = nxt;
+	  auto npos = pos;
+	  list<Road*> kewl = {};
+	  double maxi = -1.0d;
+	  bool first = true;
+	  long dist = 0;
+	  for (auto itt = nxt; itt != end; ++itt) {
+	    if (final != npos) {
+	      auto pd = shortest_path(final, npos);
+	      if (first || pd.second - static_cast<double>(dist) <= maxi) {
+		first = false;
+		maxi = pd.second - static_cast<double>(dist);
+		kewl = pd.first;
+		best = itt;
+	      }
+	    }
+	    npos = (*itt)->use(npos);
+	    dist += (*itt)->time;
+	  }
+	  long total = 0;
+	  bool nope = false;
+	  for (auto itt = nxt; itt != best; ++itt) {
+	    if ((*itt)->done == 1) {
+	      nope = true;
+	    }
+	    total -= (*itt)->time;
+	  }
+	  for (auto itt = path.begin(); itt != path.end(); ++itt) {
+	    total += (*itt)->time;
+	  }
+	  for (auto itt = kewl.begin(); itt != kewl.end(); ++itt) {
+	    total += (*itt)->time;
+	  }
+	  if (c->time + total <= time && !nope) {
+	    // pos -it-> ... -> best
+	    for (auto itt = nxt; itt != best; ++itt) {
+	      (*itt)->done--;
+	    }
+	    for (auto itt = path.begin(); itt != path.end(); ++itt) {
+	      (*itt)->done++;
+	    }
+	    for (auto itt = kewl.begin(); itt != kewl.end(); ++itt) {
+	      (*itt)->done++;
+	    }
+	    nxt = c->path.erase(nxt, best);
+	    c->time += total;
+	    c->path.insert(nxt, path.begin(), path.end());
+	    c->path.insert(nxt, kewl.begin(), kewl.end());
+	    break;
+	  }
+	}
+      }
+      it++;
+    }
+  }
+}
+
 void Routage::prune() {
   for (int i(0); i < ncars; ++i) {
     Car *c(cars[i]);
@@ -257,7 +357,8 @@ void Routage::prune() {
 	it = c->path.erase(it);
       } else {
 	if (optimizing && p.first != p.second) {
-	  list<Road*> sp(shortest_path(p.first, p.second));
+	  auto tmp(shortest_path(p.first, p.second));
+	  list<Road*> sp(tmp.first);
 	  c->path.insert(it, sp.begin(), sp.end());
 	  for (auto rit(sp.begin()), rend(sp.end()); rit != rend; ++rit) {
 	    c->time += (*rit)->time;
@@ -271,7 +372,7 @@ void Routage::prune() {
   }
 }
 
-void Routage::elarnon() {
+void Routage::elarnon1() {
   list<pair<list<Road*>::iterator, bool>> data[nroads];
   for (long i(0); i < ncars; ++i) {
     for (long j(0); j < nroads; ++j) {
@@ -341,7 +442,7 @@ void Routage::take_deadends() {
 	    }
 	  }
 	  if (pre != NULL) {
-	    printf("Small optim: %d\n", r->score);
+	    printf("Small optim: %ld\n", r->score);
 	  } else {
 	    break;
 	  }
