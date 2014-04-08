@@ -392,34 +392,37 @@ void Routage::elarnon(long depth) {
 	      // We delete abp and bap
 	      abs.first--;
 	      bas.first--;
-	      printf("spos[%ld] -> pos[%ld]: \n  ", spos->id, pos->id);
-	      Intersection* tmp = spos;
-	      printf("%ld", spos->id);
 	      for (auto at(abp.first); at != abp.second; ++at) {
-		printf(" -%ld> %ld", (*at)->id, (tmp = (*at)->use(tmp))->id);
 		(*at)->done--;
 		c->time -= (*at)->time;
 	      }
-	      printf("\n");
-	      printf("pos[%ld] -> spos[%ld]: \n  ", pos->id, spos->id);
-	      tmp = pos;
-	      printf("%ld", tmp->id);
 	      for (auto at(bap.first); at != bap.second; ++at) {
-		printf(" -%ld> %ld", (*at)->id, (tmp = (*at)->use(tmp))->id);
 		(*at)->done--;
 		c->time -= (*at)->time;
 	      }
-	      printf("\n");
-	      printf("%ld // %ld\n", (*other)->id, (*it)->id);
-	      printf("Removing [%ld -> %ld)\n", (*abp.first)->id, (*abp.second)->id);
 	      c->path.erase(abp.first, abp.second);
-	      printf("Adding [%ld .. %ld) at %ld\n", (*abp.second)->id, (*bap.first)->id, pos->id);
 	      c->path.splice(it, c->path, abp.second, bap.first);
-	      printf("Removing [%ld .. %ld)\n", (*bap.first)->id, (*bap.second)->id);
 	      c->path.erase(bap.first, bap.second);
 	      restart = true;
 	      break;
-	    } else {
+	    }/* else if (is_before<Road*>(bap.second, abp.first, c->path.end())) {
+	      // We delete abp and bap
+	      abs.first--;
+	      bas.first--;
+	      for (auto at(abp.first); at != abp.second; ++at) {
+		(*at)->done--;
+		c->time -= (*at)->time;
+	      }
+	      for (auto at(bap.first); at != bap.second; ++at) {
+		(*at)->done--;
+		c->time -= (*at)->time;
+	      }
+	      c->path.erase(bap.first, bap.second);
+	      c->path.splice(other, c->path, bap.second, abp.first);
+	      c->path.erase(abp.first, abp.second);
+	      restart = true;
+	      break;
+	      } */else {
 	      // reinsert abp and bap
 	      abs.second.push_back(abp);
 	      bas.second.push_back(bap);
