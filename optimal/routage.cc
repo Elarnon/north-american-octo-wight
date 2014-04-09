@@ -1,5 +1,6 @@
 #include "routage.hh"
 #include <iostream>
+#include <cstdlib>
 
 #include <queue>
 #include <unordered_set>
@@ -86,6 +87,44 @@ void Routage::parse(FILE* stream) {
   }
   for (long i(0); i < ncars; ++i) {
     cars[i] = new Car(i, start);
+  }
+}
+
+void Routage::swap() {
+  for (long i(0); i < ncars; ++i) {
+    long half = cars[i]->time / 3;
+    Intersection *pos(start);
+    long t(0);
+    unordered_map<Intersection*, list<Road*>::iterator> spl;
+    for (auto it(cars[i]->path.begin()); it != cars[i]->path.end(); ++it) {
+      t += (*it)->time;
+      if (rand() % 100 == 3) {
+	spl.insert({ pos, it });
+      }
+      pos = (*it)->use(pos);
+    }
+    bool stop(false);
+    for (long j(0); j < ncars; ++j) {
+      if (stop) {
+	break;
+      }
+      if (i == j) continue;
+      Intersection *opos(start);
+      long wait(3);
+      for (auto it(cars[j]->path.begin()); it != cars[j]->path.end(); ++it) {
+	auto f = spl.find(opos);
+	if (f != spl.end() && rand() % 100 == 3) {
+	  list<Road*>::iterator pt;
+	  boost::tie(pos, pt) = *f;
+	  cars[i]->path.splice(pt, cars[j]->path, it, cars[j]->path.end());
+	  cars[j]->path.splice(cars[j]->path.end(), cars[i]->path, pt, cars[i]->path.end());
+	  // TODO breaks everything
+	  stop = true;
+	  break;
+	}
+	opos = (*it)->use(opos);
+      }
+    }
   }
 }
 
@@ -419,7 +458,6 @@ void Routage::correct() {
   }
 }
 
-
 void Routage::stat_last_prune() {
   for (int i(0); i < ncars; ++i) {
     Car *c = cars[i];
@@ -429,7 +467,7 @@ void Routage::stat_last_prune() {
     for (auto it(c->path.rbegin()), ie(c->path.rend()); it != ie; ++it) {
       Road* r = *it;
       if (r->done == 1) {
-	if (pruning && 9 * t > 10 * d) {
+	if (pruning) {// && 9 * t > 10 * d) {
 	  printf("[%ld] Last prune will give %lds and lose %ldm.\n", i, t, d);
 	  for (auto ft(it.base()); ft != c->path.end(); ++ft) {
 	    (*ft)->done--;
@@ -448,18 +486,22 @@ void Routage::stat_last_prune() {
   }
 }
 
-void Routage::prune() {
+void Routage::prune(bool swap) {
   for (int i(0); i < ncars; ++i) {
     Car *c(cars[i]);
     pair<Intersection*, Intersection*> p;
     bool optimizing(false);
     Intersection* pos(start);
     long nprunable(0), t(0), d(0), tott(0);
+    long cost(0);
     for (auto it(c->path.begin());
 	 it != c->path.end(); ) {
       Intersection* oldpos = pos;
       pos = (*it)->use(pos);
-      if ((*it)->done > 1) {
+      if ((*it)->done > 1) { // || ((*it)->done == 1 && cost + (*it)->score < 100)) {
+	if ((*it)->done == 1) {
+	  cost += (*it)->score;
+	}
 	if (optimizing) {
 	  t += (*it)->time;
 	  d += (*it)->score;
@@ -477,14 +519,50 @@ void Routage::prune() {
       } else {
 	if (optimizing && p.first != p.second) {
 	  if (t > 500) {
-	    printf("[%ld] Prunable path of %ldm (%lds). May want to swap.\n", i, d, t);
+	    printf("[%ld] Prunable path of %ldm (%lds). Consider swapping.\n", i, d, t);
+	  }
+	  if (t > 500 && swap) {
+	    printf("[%ld] Prunable path of %ldm (%lds). Swapping.\n", i, d, t);
+	    // p.first -b--it-> p.second must be deleted
+	    // Search an entry to another car path near c->end
+	    // such that they pass near p.second *later*
+	    shortest_paths_from(c->pos);
+	    boost::unordered_set<Intersection*> nears;
+	    for (long j(0); j < ninters; ++j) {
+	      if (dists[j] < 250) {
+		nears.insert(inters[j]);
+	      }
+	    }
+	    shortest_paths_from(p.second);
+	    boost::unordered_set<Intersection*> near_p;
+	    for (long j(0); j < ninters; ++j) {
+	      if (dists[j] < 250) {
+		near_p.insert(inters[j]);
+	      }
+	    }
+	    for (long j(0); j < ncars; ++j) {
+	      Intersection* cpos(start);
+	      bool found(false);
+	      for (Road* r : cars[j]->path) {
+		if (near_p.find(cpos) != near_p.end()) {
+		  found = true;
+		}
+		if (found && nears.find(cpos) != nears.end()) {
+		  printf("Oh yeah !!!!\n");
+		}
+		cpos = r->use(cpos);
+	      }
+	    }
 	  }
 	  tott += t;
 	  nprunable++;
 	  auto tmp(shortest_path(p.first, p.second));
 	  list<Road*> sp(tmp.first);
-	  c->path.insert(it, sp.begin(), sp.end());
-	  for (auto rit(sp.begin()), rend(sp.end()); rit != rend; ++rit) {
+	  auto b(sp.begin());
+	  c->path.splice(it, sp);
+	  t = 0;
+	  for (auto rit(b), rend(it); rit != rend; ++rit) {
+	    t += (*rit)->time;
 	    c->time += (*rit)->time;
 	    (*rit)->done++;
 	  }
@@ -494,6 +572,23 @@ void Routage::prune() {
       }
     }
     printf("[%ld] Gain %lds maximum by pruning.\n", i, tott);
+  }
+}
+
+void Routage::relax() {
+  for (int i(0); i < ncars; ++i) {
+    Car *c = cars[i];
+    auto pre = c->path.begin();
+    for (auto it(c->path.begin()); it != c->path.end(); ++it) {
+      if (it == pre) continue;
+      if (*it == *pre) {
+	(*it)->done -= 2;
+	c->time -= (*it)->time * 2;
+	c->path.erase(pre, ++it);
+	--it;
+      }
+      pre = it;
+    }
   }
 }
 
@@ -775,7 +870,7 @@ void Routage::elarnon(long depth) {
 	      c->path.erase(bap.first, bap.second);
 	      restart = true;
 	      break;
-	    }/* else if (is_before<Road*>(bap.second, abp.first, c->path.end())) {
+	    } else if (is_before<Road*>(bap.second, abp.first, c->path.end())) {
 	      // We delete abp and bap
 	      abs.first--;
 	      bas.first--;
@@ -792,7 +887,7 @@ void Routage::elarnon(long depth) {
 	      c->path.erase(abp.first, abp.second);
 	      restart = true;
 	      break;
-	      } */else {
+	      } else {
 	      // reinsert abp and bap
 	      abs.second.push_back(abp);
 	      bas.second.push_back(bap);

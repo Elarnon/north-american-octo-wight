@@ -1,10 +1,13 @@
 #include "routage.hh"
 #include <cstdio>
 #include <boost/program_options.hpp>
+#include <cstdlib>
+#include <ctime>
 
 namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
+  srand(time(NULL));
   // Parse options
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -19,11 +22,13 @@ int main(int argc, char* argv[]) {
     ("untangle,u", "remove expensive cycles")
     ("backtrack,b", "remove some road at the ends of each car's path")
     ("search,s", "exhaustive search")
+    ("swap,w", "prune+swap (ask elarnon)")
     ("depth", po::value<unsigned long>()->default_value(10), "search depth")
     ("no-stats", "don't display stats")
     ("balance,a", "banlance cars")
     ("final,l", "final optimization")
     ("kill,k", "kill a car")
+    ("relax,r", "relax")
     ("force,f", "try all optimizations recursively (unsupported)")
     ;
   po::positional_options_description p;
@@ -54,10 +59,18 @@ int main(int argc, char* argv[]) {
     fclose(f);
   }
   if (vm.count("prune")) {
-    routage.prune();
+    routage.prune(false);
+  }
+  if (vm.count("swap")) {
+    for (int i(0); i < 70 + rand() % 100; ++i) {
+      routage.swap();
+    }
   }
   if (vm.count("final")) {
     routage.multi_elarnon();
+  }
+  if (vm.count("relax")) {
+    routage.relax();
   }
   if (vm.count("correct")) {
     routage.correct();
@@ -83,6 +96,12 @@ int main(int argc, char* argv[]) {
   if (vm.count("untangle")) {
     routage.untangle();
   }
+  if (vm.count("force")) {
+    for (int i(0); i < 2; ++i) {
+      routage.prune(false);
+      routage.elarnon(vm["depth"].as<unsigned long>());
+    }
+  }
   if (!vm.count("no-stats")) {
     routage.do_stuff();
   }
@@ -94,6 +113,8 @@ int main(int argc, char* argv[]) {
     string name = vm["input"].as<string>();
     if (vm.count("prune"))
       name += "p";
+    if (vm.count("swap"))
+      name += "w";
     if (vm.count("elarnon"))
       name += "e";
     if (vm.count("deadends"))
@@ -108,8 +129,10 @@ int main(int argc, char* argv[]) {
       name += "s";
     if (vm.count("correct"))
       name += "c";
-    if (vm.count("final"))
+    if (vm.count("force"))
       name += "f";
+    if (vm.count("final"))
+      name += "l";
     if (vm.count("balance"))
       name += "a";
     if (name != vm["input"].as<string>()) {

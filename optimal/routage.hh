@@ -29,7 +29,7 @@ public:
   void parse_sol(FILE* stream);
   void print(FILE* stream);
   void do_stuff();
-  void prune();
+  void prune(bool swap);
   void kill();
   void collect(Car* c);
   void correct();
@@ -40,6 +40,8 @@ public:
   void search(long depth);
   void untangle();
   void balance();
+  void swap();
+  void relax();
   void multi_elarnon();
   void stat_last_prune();
   void make_graph();
