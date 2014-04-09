@@ -62,9 +62,7 @@ int main(int argc, char* argv[]) {
     routage.prune(false);
   }
   if (vm.count("swap")) {
-    for (int i(0); i < 70 + rand() % 100; ++i) {
-      routage.swap();
-    }
+    routage.swap();
   }
   if (vm.count("final")) {
     routage.multi_elarnon();

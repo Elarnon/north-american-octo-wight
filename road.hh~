@@ -1,0 +1,21 @@
+#ifndef __ROAD_HH
+#define __ROAD_HH
+
+struct Intersection;
+struct Car;
+
+class Road {
+public:
+  Road(long id, Intersection *start, Intersection *end, bool bidir, long time, long score);
+
+  long id;
+  Intersection* start;
+  Intersection* end;
+  bool bidir;
+  long time;
+  long score;
+  bool done;
+  // TODO
+};
+
+#endif // __ROAD_HH

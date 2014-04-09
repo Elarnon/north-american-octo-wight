@@ -16,6 +16,7 @@ public:
 
   void move(Road* road);
   void infos(long time);
+  void recompute(Intersection *start);
 
   long id;
   Intersection* pos;

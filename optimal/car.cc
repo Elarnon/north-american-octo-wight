@@ -1,11 +1,23 @@
 #include "car.hh"
 #include "road.hh"
+#include "intersection.hh"
 
 Car::Car() {
 }
 
 Car::Car(long p_id, Intersection *p_pos)
   : id(p_id), pos(p_pos), want(0), time(0) {
+}
+
+void Car::recompute(Intersection* start) {
+  printf("Recomputing...\n");
+  time = 0;
+  for (Road* r : this->path) {
+    start = r->use(start);
+    time += r->time;
+  }
+  pos = start;
+  printf("Ok.\n");
 }
 
 void Car::move(Road* road) {

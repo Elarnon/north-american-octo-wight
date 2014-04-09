@@ -1,0 +1,123 @@
+#include "routage.hh"
+#include <boost/graph/graphviz.hpp>
+#include <iostream>
+
+Routage::Routage()
+  : start(NULL), edges(NULL), nedges(0) {
+}
+
+void Routage::parse(FILE* stream) {
+  for (auto inter : inters) {
+    delete inter;
+  }
+  for (auto road : roads) {
+    delete road;
+  }
+  for (auto car : cars) {
+    delete car;
+  }
+  inters.clear();
+  roads.clear();
+  cars.clear();
+  long ninters, nroads, ncars, start_pos;
+  fscanf(stream, " %ld %ld %ld %ld %ld", &ninters, &nroads, &time, &ncars, &start_pos);
+  Intersection* iid[ninters];
+  for (long i(0); i < ninters; ++i) {
+    double lat, lon;
+    fscanf(stream, " %lf %lf", &lat, &lon);
+    auto inter(new Intersection(i, lat, lon));
+    iid[i] = inter;
+    inters.insert(inter);
+    if (i == start_pos) {
+      start = inter;
+    }
+  }
+  for (long i(0); i < nroads; ++i) {
+    long a, b, bidir, cost, score;
+    fscanf(stream, " %ld %ld %ld %ld %ld", &a, &b, &bidir, &cost, &score);
+    roads.insert(new Road(i, iid[a], iid[b], bidir == 2, cost, score));
+  }
+  for (long i(0); i < ncars; ++i) {
+    cars.insert(new Car(i, start));
+  }
+}
+
+Graph Routage::prepare_edges() {
+  nedges = 0;
+  for (auto road : roads) {
+    nedges += (road->bidir ? 2 : 1);
+  }
+  delete[] edges;
+  edges = new pair<long, long>[nedges];
+  long weights[nedges];
+  long i(0);
+  for (auto road : roads) {
+    edges[i].first = road->start->id;
+    edges[i].second = road->end->id;
+    weights[i] = road->time;
+    ++i;
+    // TODO: map[road->start->id][road->end->id] = road;
+    if (road->bidir) {
+      edges[i].first = road->end->id;
+      edges[i].second = road->start->id;
+      weights[i] = road->time;
+      ++i;
+      // TODO: map[road->end->id][road->start->id] = road;
+    }
+  }
+  auto g = Graph(edges, edges + nedges, inters.size());
+  property_map < Graph, edge_weight_t >::type w = get(edge_weight, g);
+  graph_traits < Graph >::edge_iterator e, e_end;
+  i = 0;
+  for (boost::tie(e, e_end) = boost::edges(g); e != e_end; ++e) {
+    w[*e] = weights[i++];
+  }
+  return g;
+}
+
+void Routage::init() {
+  Graph g(prepare_edges());
+  std::map<long unsigned int, long unsigned int> m;
+  boost::associative_property_map< std::map<long unsigned int, long unsigned int> > doms(m);
+  unordered_set< pair<long unsigned int, long unsigned int> > res;
+  long **D = new long*[inters.size()];
+  for (long i(0); i < inters.size(); ++i) {
+    D[i] = new long[inters.size()];
+  }
+  lengauer_tarjan_dominator_tree(g, start->id, doms);
+  typedef graph_traits < Graph >::edge_descriptor Edge;
+  std::vector < Edge > spanning_tree;
+  kruskal_minimum_spanning_tree(g, std::back_inserter(spanning_tree));
+  // johnson_all_pairs_shortest_paths(g, D);
+  
+  /*
+  long sources[inters.size()];
+  long targets[inters.size()];
+  for (long i(0); i < inters.size(); ++i) {
+    sources[i] = 0;
+    targets[i] = 0;
+  }
+  graph_traits<Graph>::edge_iterator ei, ei_end;
+  for (tie(ei, ei_end) = boost::edges(g); ei != ei_end; ++ei) {
+    sources[source(*ei, g)]++;
+    targets[target(*ei, g)]++;
+  }
+  long ns = 0;
+  for (long i(0); i < inters.size(); ++i) {
+    if (sources[i] == 1 && targets[i] == 1) {
+      ns += 1;
+    }
+  }
+  printf("Useless vertices: %d\n", ns);
+  long nb = 0;
+  long no = 0;
+  for (auto& p : m) {
+    if (p.second == start->id) {
+      nb += 1;
+    } else {
+      no += 1;
+    }
+  }
+  printf("Children of start: %d\n", nb);
+  printf("Others:            %d\n", no);*/
+}

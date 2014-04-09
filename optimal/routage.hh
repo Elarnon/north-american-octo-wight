@@ -29,6 +29,7 @@ public:
   void parse_sol(FILE* stream);
   void print(FILE* stream);
   void do_stuff();
+  void take(Road* r);
   void prune(bool swap);
   void kill();
   void collect(Car* c);
