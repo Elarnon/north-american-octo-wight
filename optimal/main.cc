@@ -26,9 +26,11 @@ int main(int argc, char* argv[]) {
     ("depth", po::value<unsigned long>()->default_value(10), "search depth")
     ("no-stats", "don't display stats")
     ("balance,a", "banlance cars")
+    ("google,g", "fuck them")
     ("final,l", "final optimization")
     ("kill,k", "kill a car")
     ("relax,r", "relax")
+    ("mpp", po::value<string>(), "dump mpp")
     ("force,f", "try all optimizations recursively (unsupported)")
     ;
   po::positional_options_description p;
@@ -53,6 +55,7 @@ int main(int argc, char* argv[]) {
     routage.parse(stdin);
   }
   routage.make_graph();
+  routage.compute_shortest_paths();
   if (vm.count("input")) {
     FILE* f(fopen(vm["input"].as<string>().c_str(), "r"));
     routage.parse_sol(f);
@@ -63,6 +66,9 @@ int main(int argc, char* argv[]) {
   }
   if (vm.count("swap")) {
     routage.swap();
+  }
+  if (vm.count("google")) {
+    routage.average();
   }
   if (vm.count("final")) {
     routage.multi_elarnon();
@@ -103,6 +109,11 @@ int main(int argc, char* argv[]) {
   if (!vm.count("no-stats")) {
     routage.do_stuff();
   }
+  if (vm.count("mpp")) {
+    FILE* f(fopen(vm["mpp"].as<string>().c_str(), "w"));
+    routage.dump_mpp(f);
+    fclose(f);
+  }
   if (vm.count("output")) {
     FILE* f(fopen(vm["output"].as<string>().c_str(), "w"));
     routage.print(f);
@@ -111,6 +122,8 @@ int main(int argc, char* argv[]) {
     string name = vm["input"].as<string>();
     if (vm.count("prune"))
       name += "p";
+    if (vm.count("google"))
+      name += "g";
     if (vm.count("swap"))
       name += "w";
     if (vm.count("elarnon"))

@@ -43,6 +43,9 @@ public:
   void balance();
   void swap();
   void relax();
+  void compute_shortest_paths();
+  void dump_mpp(FILE* stream);
+  void average();
   void multi_elarnon();
   void stat_last_prune();
   void make_graph();
@@ -54,8 +57,11 @@ public:
 private:
   // Graph prepare_edges();
   Graph g;
+  Graph r;
   vector<Graph::vertex_descriptor> preds;
   vector<long> dists;
+  vector<Graph::vertex_descriptor> succs;
+  vector<long> rdists;
   Intersection* start;
   Intersection** inters;
   long ninters;
@@ -64,6 +70,7 @@ private:
   Car** cars;
   long ncars;
   pair<long, long>* edges;
+  pair<long, long>* redges;
   long nedges;
   location* locs;
   long time;

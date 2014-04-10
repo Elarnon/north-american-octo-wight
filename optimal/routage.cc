@@ -90,12 +90,117 @@ void Routage::parse(FILE* stream) {
   }
 }
 
+void Routage::dump_mpp(FILE* stream) {
+  fprintf(stream, "NUMNODES %ld\n", ninters);
+  long arcs(0);
+  for (long i(0); i < nroads; ++i) {
+    if (!roads[i]->bidir) {
+      arcs++;
+    }
+  }
+  fprintf(stream, "NUMARCS %ld\n", arcs);
+  fprintf(stream, "NUMEDGES %ld\n", nroads - arcs);
+  for (long i(0); i < nroads; ++i) {
+    if (!roads[i]->bidir) {
+      fprintf(stream, "A %ld %ld %ld\n", roads[i]->start->id, roads[i]->end->id, roads[i]->time);
+    }
+  }
+  for (long i(0); i < nroads; ++i) {
+    if (roads[i]->bidir) {
+      fprintf(stream, "E %ld %ld %ld\n", roads[i]->start->id, roads[i]->end->id, roads[i]->time);
+    }
+  }
+}
+
+void Routage::average() {
+  long mini(0), min(cars[0]->time);
+  for (int i(0); i < ncars; ++i) {
+    if (cars[i]->time > min) {
+      mini = i;
+      min = cars[i]->time;
+    }
+  }
+  printf("Chose mini: %ld\n", mini);
+  for (int j(0); j < ncars; ++j) {
+    if (j == mini) continue;
+    long x(0);
+    boost::unordered_set<Road*> iroads;
+    for (auto it(cars[mini]->path.begin()); it != cars[mini]->path.end(); ++it) {
+      iroads.insert(*it);
+    }
+    Intersection *pos(start);
+    for (auto jt(cars[j]->path.begin()); jt != cars[j]->path.end(); ++jt) {
+      // pos - jt ->
+      auto iit = iroads.find(*jt);
+      if (iit != iroads.end()) {
+	Intersection *spos(start);
+	list<Road*>::iterator istart;
+	for (auto tmp(cars[mini]->path.begin()); tmp != cars[mini]->path.end(); ++tmp) {
+	  istart = tmp;
+	  if (*tmp == *iit && spos == pos) {
+	    break;
+	  }
+	  spos = (*tmp)->use(spos);
+	}
+	if (spos == pos) {
+	  // spos==pos - istart ->
+	  Intersection *opos(pos);
+	  long jtime(0);
+	  for (auto tmp(jt); tmp != cars[j]->path.end(); ++tmp) {
+	    // pos - jt - .. -> opos - tmp ->
+	    if (iroads.find(*tmp) != iroads.end()) {
+	      list<Road*>::iterator sol = cars[mini]->path.end();
+	      long itime(0);
+	      Intersection *ospos(spos);
+	      // spos==pos - istart -.. - ospos - sol ->
+	      for (auto imp(istart); imp != cars[mini]->path.end(); ++imp) {
+		sol = imp;
+		if (ospos == opos) break;
+		ospos = (*imp)->use(ospos);
+		itime += (*imp)->time;
+	      }
+	      if (sol == cars[mini]->path.end() || cars[mini]->time - itime + jtime > time ||
+		  cars[j]->time - jtime + itime >= min || itime <= jtime
+		  || tmp == jt || sol == istart || ospos != opos) {
+		// Nope.
+		opos = (*tmp)->use(opos);
+		jtime += (*tmp)->time;
+		continue;
+	      } else {
+		printf("Balancing %ld ~ %ld\n", jtime, itime);
+		// Yes
+		printf("[%ld] %ld - istart -> %ld - .. -> %ld - sol ->\n", mini, spos->id, (*istart)->use(spos)->id, ospos->id);
+		printf("%ld and %ld for %ld\n", (*jt)->start->id, (*jt)->end->id, pos->id);
+		printf("[%ld] %ld - jt -> %ld - .. -> %ld - tmp ->\n", j, pos->id, (*jt)->use(pos)->id, opos->id);
+		cars[mini]->path.splice(istart, cars[j]->path, jt, tmp);
+		cars[j]->path.splice(tmp, cars[mini]->path, istart, sol);
+		cars[mini]->time = cars[mini]->time - itime + jtime;
+		cars[j]->time = cars[j]->time - jtime + itime;
+		return;
+	      }
+	    }
+	    opos = (*tmp)->use(opos);
+	    jtime += (*tmp)->time;
+	  }
+	}
+      }
+      pos = (*jt)->use(pos);
+    }
+  }
+}
+
 void Routage::swap() {
   long done(-1);
   long moved(0);
   for (long i(rand() % ncars); i < ncars; ++i) {
-    if (moved > 100) {
-      printf("Stop %ld %ld\n", done, i);
+    long max(cars[0]->time);
+    for (long j(0); j < ncars; ++j) {
+      if (cars[j]->time > max) {
+	max = cars[j]->time;
+      }
+    }
+    if (max < 5900) {
+      printf("Stop %ld %ld\n", max, moved);
       break;
     }
     elarnon1();
@@ -184,6 +289,7 @@ void Routage::make_graph() {
   for (long j(0); j < nroads; ++j) {
     nedges += (roads[j]->bidir ? 2 : 1);
   }
+  delete[] redges;
   delete[] edges;
   delete[] locs;
   locs = new location[ninters];
@@ -192,19 +298,27 @@ void Routage::make_graph() {
     locs[j].y = inters[j]->lon;
   }
   edges = new pair<long, long>[nedges];
+  redges = new pair<long, long>[nedges];
   long weights[nedges];
+  long reweights[nedges];
   long i(0);
   for (long j(0); j < nroads; ++j) {
     Road* road(roads[j]);
     edges[i].first = road->start->id;
     edges[i].second = road->end->id;
     weights[i] = road->time;
+    redges[i].first = road->end->id;
+    redges[i].second = road->start->id;
+    rweights[i] = road->time;
     ++i;
     // TODO: map[road->start->id][road->end->id] = road;
     if (road->bidir) {
       edges[i].first = road->end->id;
       edges[i].second = road->start->id;
       weights[i] = road->time;
+      redges[i].first = road->start->id;
+      redges[i].second = road->end->id;
+      rweights[i] = road->time;
       ++i;
       // TODO: map[road->end->id][road->start->id] = road;
     }
@@ -215,6 +329,12 @@ void Routage::make_graph() {
   i = 0;
   for (boost::tie(e, e_end) = boost::edges(g); e != e_end; ++e) {
     w[*e] = weights[i++];
+  }
+  r = Graph(redges, redges + nedges, ninters);
+  property_map < Graph, edge_weight_t >::type rw = get(edge_weight, r);
+  i = 0;
+  for (boost::tie(e, e_end) = boost::edges(r); e != e_end; ++e) {
+    w[*e] = rweights[i++];
   }
 }
 
@@ -232,6 +352,9 @@ void Routage::print(FILE* stream) {
 }
 
 void Routage::shortest_paths_from(Intersection* from) {
+  // What size in mem ?
+  //auto *stuff = new vector<Graph::vertex_descriptor>(preds);
+  //auto *staff = new vector<long>(dists);
   preds = vector<Graph::vertex_descriptor>(num_vertices(g));
   dists = vector<long>(num_vertices(g));
   dijkstra_shortest_paths(g, vertex(from->id, g),
@@ -552,13 +675,14 @@ void Routage::stat_last_prune() {
       if (r->done == 1) {
 	if (pruning && t > 4 * d) {// && 9 * t > 10 * d) {
 	  printf("[%ld] Last prune would give %lds and lose %ldm.\n", i, t, d);
-	  /*
-	  for (auto ft(it.base()); ft != c->path.end(); ++ft) {
-	    (*ft)->done--;
-	    c->time -= (*ft)->time;
+	  if (d == 0) {
+	    for (auto ft(it.base()); ft != c->path.end(); ++ft) {
+	      (*ft)->done--;
+	      c->time -= (*ft)->time;
+	    }
+	    c->path.erase(it.base(), c->path.end());
+	    break;
 	  }
-	  c->path.erase(it.base(), c->path.end());
-	  break;*/
 	}
 	d += (*it)->score;
       } else {
@@ -567,6 +691,13 @@ void Routage::stat_last_prune() {
       }
       pos = r->use(pos);
     }
+  }
+}
+
+void Routage::compute_shortest_paths() {
+  for (int i(0); i < ninters; ++i) {
+    shortest_paths_from(inters[i]);
+    write_shortest_paths();
   }
 }
 
@@ -582,7 +713,7 @@ void Routage::prune(bool swap) {
 	 it != c->path.end(); ) {
       Intersection* oldpos = pos;
       pos = (*it)->use(pos);
-      if ((*it)->done > 1) { // || ((*it)->done == 1 && cost + (*it)->score < 100)) {
+      if ((*it)->done > 1) {// || ((*it)->done == 1 && cost + (*it)->score < 10 && (*it)->bidir)) {
 	if ((*it)->done == 1) {
 	  cost += (*it)->score;
 	}
@@ -926,7 +1057,7 @@ void Routage::multi_elarnon() {
 }
 
 void Routage::elarnon(long depth) {
-  elarnon1();
+  //elarnon1();
   for (long i(0); i < ncars; ++i) {
     printf("Car %ld...\n", i);
     bool restart = false;
@@ -1005,9 +1136,9 @@ void Routage::elarnon(long depth) {
 	break;
       }
       if (buffer.size() == depth) {
-	buffer.pop_front();
+	buffer.pop_back();
       }
-      buffer.push_back({ pos, it });
+      buffer.push_front({ pos, it });
       pos = (*it)->use(pos);
       ++it;
     }
@@ -1147,21 +1278,12 @@ void Routage::do_stuff() {
   long missing(0);
   long d(0);
   long t(0);
-  long nim(0);
-  long bim(0);
   long total(0);
   long dones(0);
   for (int i(0); i < nroads; ++i) {
     dones += roads[i]->done;
     if (!roads[i]->done) {
       printf("Missing road: %ld from (%lf, %lf) to (%lf, %lf) (%ld)\n", i, roads[i]->start->lat, roads[i]->start->lon, roads[i]->end->lat, roads[i]->end->lon, roads[i]->bidir);
-      if (roads[i]->end->starts_here.size() <= 1) {
-	nim++;
-	bim += roads[i]->time;
-      } else if (roads[i]->start->starts_here.size() <= 1) {
-	nim++;
-	bim += roads[i]->time;
-      }
       missing++;
       d += roads[i]->score;
       t += roads[i]->time;
@@ -1169,7 +1291,13 @@ void Routage::do_stuff() {
       total += roads[i]->score;
     }
   }
-  printf("Score: %ld\n", total);
+  int rem(time - cars[0]->time);
+  for (int i(0); i < ncars; ++i) {
+    if (time - cars[i]->time < rem) {
+      rem = time - cars[i]->time;
+    }
+  }
+  printf("Score: %ld.%05ld\n", total, rem);
   printf("Avg redundancy: %ld%\n", dones * 100 / nroads);
   printf("Missing roads: %ld for %ldm (at least %lds)\n", missing, d, t);
   long tot(0);
@@ -1178,5 +1306,4 @@ void Routage::do_stuff() {
     cars[i]->infos(time);
   }
   printf("Remaining total time: %lds (avg %lds)\n", tot, tot / ncars);
-  printf("Impasses: %ld for %ld\n", nim, bim);
 }
