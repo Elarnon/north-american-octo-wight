@@ -38,8 +38,13 @@ public:
   pair<list<Road*>, double> shortest_path(Intersection* from, Intersection* to);
   void shortest_paths_from(Intersection* from);
   pair<list<Road*>, long> shortest_path_to(Intersection* to);
+  void shortest_paths_to(Intersection* to);
+  pair<list<Road*>, long> shortest_path_from(Intersection* from);
   void search(long depth);
   void untangle();
+  void cut();
+  void cut(Car* from);
+  long eval_cut(Car* from);
   void balance();
   void swap();
   void relax();

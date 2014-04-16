@@ -16,6 +16,7 @@ int main(int argc, char* argv[]) {
     ("map,m", po::value<string>(), "map file")
     ("output,o", po::value<string>(), "output file")
     ("correct,c", "improve")
+    ("cut", "cut")
     ("prune,p", "perform pruning")
     ("elarnon,e", "perform elarnon's optimization")
     ("deadends,d", "take missed deadends if possible")
@@ -55,7 +56,7 @@ int main(int argc, char* argv[]) {
     routage.parse(stdin);
   }
   routage.make_graph();
-  routage.compute_shortest_paths();
+  //routage.compute_shortest_paths();
   if (vm.count("input")) {
     FILE* f(fopen(vm["input"].as<string>().c_str(), "r"));
     routage.parse_sol(f);
@@ -69,6 +70,9 @@ int main(int argc, char* argv[]) {
   }
   if (vm.count("google")) {
     routage.average();
+  }
+  if (vm.count("cut")) {
+    routage.cut();
   }
   if (vm.count("final")) {
     routage.multi_elarnon();

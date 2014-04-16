@@ -22,7 +22,8 @@ template<class T> bool is_before(typename list<T>::iterator x, typename list<T>:
 
 Routage::Routage()
   : start(NULL), edges(NULL), nedges(0), inters(NULL), ninters(0)
-  , roads(NULL), nroads(0), cars(NULL), ncars(0), locs(NULL) {
+  , roads(NULL), nroads(0), cars(NULL), ncars(0), locs(NULL)
+  , redges(NULL) {
 }
 
 template <class Graph, class CostType, class LocMap>
@@ -300,7 +301,7 @@ void Routage::make_graph() {
   edges = new pair<long, long>[nedges];
   redges = new pair<long, long>[nedges];
   long weights[nedges];
-  long reweights[nedges];
+  long rweights[nedges];
   long i(0);
   for (long j(0); j < nroads; ++j) {
     Road* road(roads[j]);
@@ -334,7 +335,7 @@ void Routage::make_graph() {
   property_map < Graph, edge_weight_t >::type rw = get(edge_weight, r);
   i = 0;
   for (boost::tie(e, e_end) = boost::edges(r); e != e_end; ++e) {
-    w[*e] = rweights[i++];
+    rw[*e] = rweights[i++];
   }
 }
 
@@ -349,6 +350,14 @@ void Routage::print(FILE* stream) {
       fprintf(stream, "%ld\n", pos->id);
     }
   }
+}
+
+void Routage::shortest_paths_to(Intersection* to) {
+  succs = vector<Graph::vertex_descriptor>(num_vertices(r));
+  rdists = vector<long>(num_vertices(r));
+  dijkstra_shortest_paths(r, vertex(to->id, r),
+			  predecessor_map(boost::make_iterator_property_map(preds.begin(), get(boost::vertex_index, r))).
+                          distance_map(boost::make_iterator_property_map(dists.begin(), get(boost::vertex_index, r))));
 }
 
 void Routage::shortest_paths_from(Intersection* from) {
@@ -384,6 +393,30 @@ pair<list<Road*>, long> Routage::shortest_path_to(Intersection* to) {
     }
   }
   return make_pair(sp, dists[to->id]);
+}
+
+pair<list<Road*>, long> Routage::shortest_path_from(Intersection* from) {
+  list<Road*> sp = { };
+  Intersection* cur(NULL);
+  for (auto v = from->id;; v = succs[v]) {
+    if (cur == NULL) {
+      cur = inters[v];
+    } else {
+      Road* rue(NULL);
+      for (auto r : inters[v]->ends_here) {
+	if (r->use(inters[v]) == cur) {
+	  rue = r;
+	  break;
+	}
+      }
+      sp.push_front(rue);
+      cur = inters[v];
+      if (succs[v] == v) {
+	break;
+      }
+    }
+  }
+  return make_pair(sp, rdists[from->id]);
 }
 
 pair<list<Road*>, double> Routage::shortest_path(Intersection* from, Intersection* to) {
@@ -697,7 +730,7 @@ void Routage::stat_last_prune() {
 void Routage::compute_shortest_paths() {
   for (int i(0); i < ninters; ++i) {
     shortest_paths_from(inters[i]);
-    write_shortest_paths();
+    //write_shortest_paths();
   }
 }
 
@@ -968,6 +1001,100 @@ void Routage::elarnon1() {
       it = nxt;
     }
   }
+}
+
+long Routage::eval_cut(Car* from) {
+  shortest_paths_from(from->pos);
+  long diff(99999999);
+  for (long i(0); i < ncars; ++i) {
+    if (cars[i] == from) continue;
+    if (cars[i]->time > time) {
+      Intersection *pos(start);
+      auto mini(cars[i]->path.begin());
+      Intersection* minpos(start);
+      long min(-1);
+      long t(0);
+      long to_end(cars[i]->time);
+      for (auto it(cars[i]->path.begin()), e(cars[i]->path.end()); it != e; ++it) {
+	if ((min == -1 && t >= time / 2) || ((to_end > time / 2  || cars[i]->time - to_end <= time) && dists[pos->id] < min && from->time + to_end + dists[pos->id] <= time)) {
+	  min = dists[pos->id];
+	  mini = it;
+	  minpos = pos;
+	}
+	t += (*it)->time;
+	to_end -= (*it)->time;
+	pos = (*it)->use(pos);
+      }
+      diff = from->time;
+      if (minpos != from->pos) {
+	auto p = shortest_path_to(minpos).first;
+	for (Road* r : p) {
+	  diff += r->time;
+	}
+      }
+      long stuff(0);
+      for (auto at(mini); at != cars[i]->path.end(); ++at) {
+	stuff += (*at)->time;
+      }
+      /*if (from->time + diff + stuff > time) {
+	return 99999999;
+      }*/
+      break;
+    }
+  }
+  return diff;
+}
+
+void Routage::cut(Car* from) {
+  shortest_paths_from(from->pos);
+  for (long i(0); i < ncars; ++i) {
+    if (cars[i] == from) continue;
+    if (cars[i]->time > time) {
+      Intersection *pos(start);
+      auto mini(cars[i]->path.begin());
+      Intersection* minpos(start);
+      long min(-1);
+      long t(0);
+      long to_end(cars[i]->time);
+      for (auto it(cars[i]->path.begin()), e(cars[i]->path.end()); it != e; ++it) {
+	if ((min == -1 && t >= time / 2) || ((to_end > time / 2 || cars[i]->time - to_end <= time) && dists[pos->id] < min && from->time + to_end + dists[pos->id] <= time)) {
+	  min = dists[pos->id];
+	  mini = it;
+	  minpos = pos;
+	}
+	t += (*it)->time;
+	to_end -= (*it)->time;
+	pos = (*it)->use(pos);
+      }
+      if (minpos != from->pos) {
+	auto p = shortest_path_to(minpos).first;
+	for (Road* r : p) {
+	  from->move(r);
+	}
+      }
+      for (auto at(mini); at != cars[i]->path.end(); ++at) {
+	from->time += (*at)->time;
+	cars[i]->time -= (*at)->time;
+      }
+      from->path.splice(from->path.end(), cars[i]->path, mini, cars[i]->path.end());
+      break;
+    }
+  }
+}
+
+void Routage::cut() {
+  long best(0);
+  long cost(eval_cut(cars[0]));
+  for (long i(1); i < ncars; ++i) {
+    long tmp = eval_cut(cars[i]);
+    printf("%ld/%ld for %ld\n", tmp, cost, i);
+    if (tmp < cost) {
+      cost = tmp;
+      best = i;
+    }
+  }
+  printf("Cutting %ld\n", best);
+  cut(cars[best]);
 }
 
 void Routage::balance() {
